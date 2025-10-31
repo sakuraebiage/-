@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>防衛戦モック（画像版）</title>
+<style>
+  body { font-family:sans-serif; margin:0; display:flex; flex-direction:column; height:100vh; }
+  #map { flex:1; position:relative; background:#eef; border:1px solid #ccc; margin:10px; border-radius:10px; }
+  .base { width:60px; height:60px; border-radius:50%; position:absolute; text-align:center; line-height:60px; color:white; font-weight:bold; font-size:12px; }
+  .green { background:green; }
+  .yellow { background:gold; color:black; }
+  .red { background:red; }
+  .fire { background:orange; animation:flash 1s infinite alternate; }
+  @keyframes flash { from {opacity:1;} to {opacity:0.5;} }
+
+  .face { width:30px; height:30px; border-radius:50%; display:block; margin:0 auto; margin-top:2px; }
+  #log { height:120px; overflow-y:auto; background:#222; color:#fff; padding:5px; font-size:14px; }
+  #chat { height:100px; overflow-y:auto; background:#333; color:#fff; padding:5px; font-size:14px; }
+  #chat input { width:80%; }
+  #chat button { width:18%; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="log">戦況アナウンス...</div>
+<div id="chat">
+  <div id="chat-messages"></div>
+  <input type="text" id="chat-input" placeholder="発言...">
+  <button onclick="sendChat()">送信</button>
+</div>
+
+<script>
+const map = document.getElementById('map');
+const log = document.getElementById('log');
+const chatMessages = document.getElementById('chat-messages');
+
+// 仮画像URL（GitHubなどに置くかデータURLでも可）
+const faceImages = [
+  'https://via.placeholder.com/30?text=A',
+  'https://via.placeholder.com/30?text=B',
+  'https://via.placeholder.com/30?text=C',
+  'https://via.placeholder.com/30?text=D'
+];
+
+// 20拠点情報
+const bases = [];
+for(let i=0;i<20;i++){
+  bases.push({
+    name:'拠点'+(i+1),
+    angle:i*18,
+    status:'green',
+    face:faceImages[i%faceImages.length]
+  });
+}
+
+// マップに配置
+function renderMap(){
+  map.innerHTML = '';
+  const cx = map.clientWidth/2;
+  const cy = map.clientHeight/2;
+  const r = Math.min(cx, cy)-50;
+  bases.forEach(b=>{
+    const rad = b.angle*Math.PI/180;
+    const x = cx + r*Math.cos(rad) -30;
+    const y = cy + r*Math.sin(rad) -30;
+    const div = document.createElement('div');
+    div.className = 'base '+b.status;
+    div.style.left = x+'px';
+    div.style.top = y+'px';
+    div.innerHTML = b.name+'<img class="face" src="'+b.face+'">';
+    map.appendChild(div);
+  });
+}
+
+// 戦況更新（簡易ランダム）
+function updateStatus(){
+  bases.forEach(b=>{
+    const r = Math.random();
+    if(r<0.1) b.status='fire';
+    else if(r<0.3) b.status='red';
+    else if(r<0.6) b.status='yellow';
+    else b.status='green';
+  });
+  renderMap();
+  log.innerHTML = '防衛戦更新！\n' + bases.map(b=>b.name+':'+b.status).join(' | ');
+}
+
+// チャット送信
+function sendChat(){
+  const val = document.getElementById('chat-input').value;
+  if(!val) return;
+  const msg = document.createElement('div');
+  msg.textContent = 'プレイヤー: '+val;
+  chatMessages.appendChild(msg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  document.getElementById('chat-input').value='';
+}
+
+// 初期表示
+renderMap();
+setInterval(updateStatus,5000);
+
+</script>
+</body>
+</html>
