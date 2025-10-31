@@ -21,12 +21,18 @@ body { font-family: sans-serif; margin: 0; padding: 0; }
 const map = document.getElementById('map');
 const announcements = document.getElementById('announcements');
 
-// 拠点データ
-const bases = [
-  { id: 'official1', x: 100, y: 100, type: 'official', name: '学園本部', faces: ['A','B'] },
-  { id: 'user1', x: 250, y: 150, type: 'user', name: 'カフェ', faces: ['C'] },
-  { id: 'user2', x: 100, y: 250, type: 'user', name: '研究室', faces: ['D','E'] }
-];
+// 20個拠点サンプルデータ
+const bases = [];
+for(let i=0;i<20;i++){
+  bases.push({
+    id: 'base'+i,
+    x: 50 + (i%5)*100, // 5列
+    y: 50 + Math.floor(i/5)*100, // 4行
+    type: i%4===0 ? 'official' : 'user', // 4つに1つ公式
+    name: '拠点'+(i+1),
+    faces: ['A','B'] // 仮
+  });
+}
 
 // マップに配置
 bases.forEach(b => {
@@ -34,7 +40,7 @@ bases.forEach(b => {
   div.className = 'base ' + b.type;
   div.style.left = b.x + 'px';
   div.style.top = b.y + 'px';
-  div.innerHTML = b.name[0]; // 先頭文字表示
+  div.innerHTML = b.name[0]; // 先頭文字
 
   // 顔アイコン
   b.faces.forEach(f => {
@@ -53,29 +59,11 @@ bases.forEach(b => {
   map.appendChild(div);
 });
 
-// 線を描く関数
-function drawLine(x1, y1, x2, y2){
-  const line = document.createElement('div');
-  line.className = 'arrow';
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const length = Math.sqrt(dx*dx + dy*dy);
-  line.style.width = length + 'px';
-  line.style.left = x1 + 'px';
-  line.style.top = y1 + 'px';
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-  line.style.transform = `rotate(${angle}deg)`;
-  map.appendChild(line);
-}
-
-// 線を描く（公式→ユーザー拠点）
-drawLine(100+20,100+20,250+20,150+20);
-drawLine(100+20,100+20,100+20,250+20);
-
 // 簡易アナウンス
 const logs = [
-  '学園本部防衛完了！',
-  '研究室撤退まであと2日'
+  '防衛戦開始！',
+  '拠点1に増援到着',
+  '拠点5撤退まであと2日'
 ];
 logs.forEach(l => {
   const p = document.createElement('p');
