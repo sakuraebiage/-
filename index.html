@@ -11,7 +11,6 @@ body { font-family: sans-serif; margin: 0; padding: 0; }
 .user { background: #4caf50; }
 .arrow { position: absolute; width: 2px; background: black; transform-origin: top left; }
 #announcements { height: 20vh; background: #fafafa; overflow-y: auto; padding: 10px; border-top: 1px solid #ccc; }
-.face { width: 20px; height: 20px; border-radius: 50%; display: inline-block; background: #ffeb3b; margin-right: 2px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -21,16 +20,15 @@ body { font-family: sans-serif; margin: 0; padding: 0; }
 const map = document.getElementById('map');
 const announcements = document.getElementById('announcements');
 
-// 20個拠点サンプルデータ
+// 20個拠点サンプル
 const bases = [];
 for(let i=0;i<20;i++){
   bases.push({
     id: 'base'+i,
-    x: 50 + (i%5)*100, // 5列
-    y: 50 + Math.floor(i/5)*100, // 4行
-    type: i%4===0 ? 'official' : 'user', // 4つに1つ公式
-    name: '拠点'+(i+1),
-    faces: ['A','B'] // 仮
+    x: 50 + (i%5)*100,
+    y: 50 + Math.floor(i/5)*100,
+    type: i%4===0 ? 'official' : 'user',
+    name: '拠点'+(i+1)
   });
 }
 
@@ -40,15 +38,7 @@ bases.forEach(b => {
   div.className = 'base ' + b.type;
   div.style.left = b.x + 'px';
   div.style.top = b.y + 'px';
-  div.innerHTML = b.name[0]; // 先頭文字
-
-  // 顔アイコン
-  b.faces.forEach(f => {
-    const fdiv = document.createElement('span');
-    fdiv.className = 'face';
-    fdiv.title = f;
-    div.appendChild(fdiv);
-  });
+  div.textContent = b.name[0];
 
   // クリックでチャットページへ
   div.onclick = () => {
@@ -66,10 +56,4 @@ const logs = [
   '拠点5撤退まであと2日'
 ];
 logs.forEach(l => {
-  const p = document.createElement('p');
-  p.textContent = l;
-  announcements.appendChild(p);
-});
-</script>
-</body>
-</html>
+  const p = do
