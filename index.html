@@ -2,92 +2,87 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>防衛戦モック</title>
+<title>防衛戦マップ</title>
 <style>
-  body { font-family: sans-serif; margin:0; display:flex; flex-direction:column; height:100vh; }
-  #map { flex:1; position:relative; background:#eef; border:1px solid #ccc; margin:10px; border-radius:10px; }
-  .base { width:50px; height:50px; border-radius:50%; position:absolute; text-align:center; line-height:50px; color:white; font-weight:bold; }
-  .green { background:green; }
-  .yellow { background:gold; color:black; }
-  .red { background:red; }
-  .fire { background:orange; }
-  .face { width:30px; height:30px; border-radius:50%; background:#fff; display:inline-block; vertical-align:middle; margin-left:2px; }
-  #log { height:120px; overflow-y:auto; background:#222; color:#fff; padding:5px; font-size:14px; }
-  #chat { height:100px; overflow-y:auto; background:#333; color:#fff; padding:5px; font-size:14px; }
-  #chat input { width:80%; }
-  #chat button { width:18%; }
+body { font-family: sans-serif; margin: 0; padding: 0; }
+#map { position: relative; width: 100%; height: 80vh; background: #e0f7fa; }
+.base { width: 40px; height: 40px; border-radius: 50%; position: absolute; text-align: center; line-height: 40px; color: #fff; font-weight: bold; cursor: pointer; }
+.official { background: #ff5722; }
+.user { background: #4caf50; }
+.arrow { position: absolute; width: 2px; background: black; transform-origin: top left; }
+#announcements { height: 20vh; background: #fafafa; overflow-y: auto; padding: 10px; border-top: 1px solid #ccc; }
+.face { width: 20px; height: 20px; border-radius: 50%; display: inline-block; background: #ffeb3b; margin-right: 2px; vertical-align: middle; }
 </style>
 </head>
 <body>
-
 <div id="map"></div>
-<div id="log">戦況アナウンス...</div>
-<div id="chat">
-  <div id="chat-messages"></div>
-  <input type="text" id="chat-input" placeholder="発言...">
-  <button onclick="sendChat()">送信</button>
-</div>
-
+<div id="announcements"></div>
 <script>
 const map = document.getElementById('map');
-const log = document.getElementById('log');
-const chatMessages = document.getElementById('chat-messages');
+const announcements = document.getElementById('announcements');
 
-// 20拠点情報
-const bases = [];
-for(let i=0;i<20;i++){
-  bases.push({name:'拠点'+(i+1), angle:i*18, status:'green', face:'😀'});
-}
+// 拠点データ
+const bases = [
+  { id: 'official1', x: 100, y: 100, type: 'official', name: '学園本部', faces: ['A','B'] },
+  { id: 'user1', x: 250, y: 150, type: 'user', name: 'カフェ', faces: ['C'] },
+  { id: 'user2', x: 100, y: 250, type: 'user', name: '研究室', faces: ['D','E'] }
+];
 
 // マップに配置
-function renderMap(){
-  map.innerHTML = '';
-  const cx = map.clientWidth/2;
-  const cy = map.clientHeight/2;
-  const r = Math.min(cx, cy)-50;
-  bases.forEach(b=>{
-    const rad = b.angle*Math.PI/180;
-    const x = cx + r*Math.cos(rad) -25;
-    const y = cy + r*Math.sin(rad) -25;
-    const div = document.createElement('div');
-    div.className = 'base '+b.status;
-    div.style.left = x+'px';
-    div.style.top = y+'px';
-    div.innerHTML = b.name+'<div class="face">'+b.face+'</div>';
-    map.appendChild(div);
+bases.forEach(b => {
+  const div = document.createElement('div');
+  div.className = 'base ' + b.type;
+  div.style.left = b.x + 'px';
+  div.style.top = b.y + 'px';
+  div.innerHTML = b.name[0]; // 先頭文字表示
+
+  // 顔アイコン
+  b.faces.forEach(f => {
+    const fdiv = document.createElement('span');
+    fdiv.className = 'face';
+    fdiv.title = f;
+    div.appendChild(fdiv);
   });
+
+  // クリックでチャットページへ
+  div.onclick = () => {
+    const areaName = encodeURIComponent(b.name);
+    window.location.href = `chat.html?area=${areaName}`;
+  };
+
+  map.appendChild(div);
+});
+
+// 線を描く関数
+function drawLine(x1, y1, x2, y2){
+  const line = document.createElement('div');
+  line.className = 'arrow';
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const length = Math.sqrt(dx*dx + dy*dy);
+  line.style.width = length + 'px';
+  line.style.left = x1 + 'px';
+  line.style.top = y1 + 'px';
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  line.style.transform = `rotate(${angle}deg)`;
+  map.appendChild(line);
 }
 
-// 戦況更新（簡易ランダム）
-function updateStatus(){
-  bases.forEach(b=>{
-    const r = Math.random();
-    if(r<0.1) b.status='fire';
-    else if(r<0.3) b.status='red';
-    else if(r<0.6) b.status='yellow';
-    else b.status='green';
-  });
-  renderMap();
-  log.innerHTML = '防衛戦更新！\n' + bases.map(b=>b.name+':'+b.status).join(' | ');
-}
+// 線を描く（公式→ユーザー拠点）
+drawLine(100+20,100+20,250+20,150+20);
+drawLine(100+20,100+20,100+20,250+20);
 
-// チャット送信
-function sendChat(){
-  const val = document.getElementById('chat-input').value;
-  if(!val) return;
-  const msg = document.createElement('div');
-  msg.textContent = 'プレイヤー: '+val;
-  chatMessages.appendChild(msg);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  document.getElementById('chat-input').value='';
-}
-
-// 初期表示
-renderMap();
-
-// 5秒ごとに戦況更新
-setInterval(updateStatus,5000);
-
+// 簡易アナウンス
+const logs = [
+  '学園本部防衛完了！',
+  'カフェに増援到着',
+  '研究室撤退まであと2日'
+];
+logs.forEach(l => {
+  const p = document.createElement('p');
+  p.textContent = l;
+  announcements.appendChild(p);
+});
 </script>
 </body>
 </html>
