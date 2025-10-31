@@ -12,6 +12,7 @@ body { font-family: sans-serif; margin: 0; padding: 0; display: flex; height: 10
 #input input { flex: 1; padding: 5px; }
 #input button { padding: 5px; }
 .area { padding: 5px; background: #b0bec5; margin-bottom: 5px; cursor: pointer; }
+.area.active { background: #90a4ae; font-weight: bold; }
 .face { width: 20px; height: 20px; border-radius: 50%; display: inline-block; background: #ffeb3b; margin-right: 5px; vertical-align: middle; }
 </style>
 </head>
@@ -31,7 +32,9 @@ body { font-family: sans-serif; margin: 0; padding: 0; display: flex; height: 10
 </div>
 
 <script>
-let areas = [{name: '学園本部', messages: []}];
+let areas = [
+  {name: '学園本部', messages: []}
+];
 let currentArea = 0;
 
 function renderAreas(){
@@ -39,12 +42,17 @@ function renderAreas(){
   list.innerHTML = '';
   areas.forEach((a,i) => {
     const div = document.createElement('div');
-    div.className = 'area';
+    div.className = 'area' + (i===currentArea ? ' active' : '');
     div.textContent = a.name;
-    div.onclick = () => { currentArea=i; renderMessages(); };
+    div.onclick = () => { 
+      currentArea=i; 
+      renderAreas(); // クリックでハイライト
+      renderMessages(); // 選択したエリアのチャット表示
+    };
     list.appendChild(div);
   });
 }
+
 function renderMessages(){
   const msgDiv = document.getElementById('messages');
   msgDiv.innerHTML = '';
@@ -57,7 +65,11 @@ function renderMessages(){
 
 function addArea(){
   const name = document.getElementById('newArea').value;
-  if(name){ areas.push({name: name, messages: []}); renderAreas(); document.getElementById('newArea').value=''; }
+  if(name){ 
+    areas.push({name: name, messages: []}); 
+    document.getElementById('newArea').value='';
+    renderAreas();
+  }
 }
 
 function sendMessage(){
@@ -69,6 +81,7 @@ function sendMessage(){
   }
 }
 
+// 初期表示
 renderAreas();
 renderMessages();
 </script>
