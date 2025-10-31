@@ -1,1 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>RPチャット</title>
+<style>
+body { font-family: sans-serif; margin: 0; padding: 0; }
+#areas { width: 30%; float: left; height: 100vh; overflow-y: auto; background: #eceff1; padding: 10px; }
+#chat { width: 70%; float: left; height: 100vh; display: flex; flex-direction: column; }
+#messages { flex: 1; overflow-y: auto; padding: 10px; border-bottom: 1px solid #ccc; }
+#input { display: flex; }
+#input input { flex: 1; padding: 5px; }
+#input button { padding: 5px; }
+.area { padding: 5px; background: #b0bec5; margin-bottom: 5px; cursor: pointer; }
+.face { width: 20px; height: 20px; border-radius: 50%; display: inline-block; background: #ffeb3b; margin-right: 5px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div id="areas">
+  <h3>エリア一覧</h3>
+  <div id="areaList"></div>
+  <input id="newArea" placeholder="新しいエリア名">
+  <button onclick="addArea()">追加</button>
+</div>
+<div id="chat">
+  <div id="messages"></div>
+  <div id="input">
+    <input id="msgInput" placeholder="メッセージ入力">
+    <button onclick="sendMessage()">送信</button>
+  </div>
+</div>
+
+<script>
+let areas = [{name: '学園本部', messages: []}];
+let currentArea = 0;
+
+function renderAreas(){
+  const list = document.getElementById('areaList');
+  list.innerHTML = '';
+  areas.forEach((a,i) => {
+    const div = document.createElement('div');
+    div.className = 'area';
+    div.textContent = a.name;
+    div.onclick = () => { currentArea=i; renderMessages(); };
+    list.appendChild(div);
+  });
+}
+function renderMessages(){
+  const msgDiv = document.getElementById('messages');
+  msgDiv.innerHTML = '';
+  areas[currentArea].messages.forEach(m => {
+    const p = document.createElement('p');
+    p.innerHTML = `<span class="face"></span><b>${m.user}:</b> ${m.text}`;
+    msgDiv.appendChild(p);
+  });
+}
+
+function addArea(){
+  const name = document.getElementById('newArea').value;
+  if(name){ areas.push({name: name, messages: []}); renderAreas(); document.getElementById('newArea').value=''; }
+}
+
+function sendMessage(){
+  const text = document.getElementById('msgInput').value;
+  if(text){
+    areas[currentArea].messages.push({user:'自分', text:text});
+    renderMessages();
+    document.getElementById('msgInput').value='';
+  }
+}
+
+renderAreas();
+renderMessages();
+</script>
+</body>
+</html>
 
