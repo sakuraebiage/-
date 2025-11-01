@@ -3,26 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <title>トップ画面</title>
-<link rel="stylesheet" href="style.css">
+<style>
+  body { background:#000; color:#fff; font-family:sans-serif; padding:20px; }
+  .char-card {
+    display:flex; align-items:center; padding:10px; margin:10px; border:1px solid #8ae1ff; cursor:pointer;
+    background:#111;
+  }
+  .char-card img { width:120px; height:120px; object-fit:cover; margin-right:10px; }
+  .char-info { display:flex; flex-direction:column; }
+  .char-info span { margin:2px 0; }
+</style>
 </head>
 <body>
-<header>
-<h1>トップ画面</h1>
-<nav>
-<a href="register.html">新規登録</a>
-<a href="mypage.html">マイページ</a>
-<a href="defense.html">防衛画面</a>
-</nav>
-</header>
-
-<div style="padding:20px;">
-<h2>登録キャラクター一覧</h2>
+<h1>登録キャラクター一覧</h1>
 <div id="charList"></div>
-</div>
+<a href="register.html">新しいキャラクターを登録</a>
 
-<script src="script.js"></script>
 <script>
-renderCharacterList(document.getElementById("charList"));
+const charListDiv = document.getElementById("charList");
+
+// localStorage からキャラクター取得
+const chars = JSON.parse(localStorage.getItem("characters") || "[]");
+
+if(chars.length === 0){
+  charListDiv.textContent = "登録済みキャラクターがいません。";
+} else {
+  chars.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "char-card";
+
+    // 立ち絵
+    const img = document.createElement("img");
+    img.src = c.avatar || "default_avatar.png"; // avatarがなければデフォルト
+    div.appendChild(img);
+
+    // キャラクター情報
+    const info = document.createElement("div");
+    info.className = "char-info";
+    info.innerHTML = `
+      <span><strong>${c.name}</strong></span>
+      <span>直近行動: ${c.lastAction || "なし"}</span>
+      <span>直近発言: ${c.lastMessage || "なし"}</span>
+    `;
+    div.appendChild(info);
+
+    // マイページに飛ぶ
+    div.addEventListener("click", () => {
+      window.location.href = `mypage.html?id=${encodeURIComponent(c.id)}`;
+    });
+
+    charListDiv.appendChild(div);
+  });
+}
 </script>
 </body>
 </html>
