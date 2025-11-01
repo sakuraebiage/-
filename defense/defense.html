@@ -194,7 +194,7 @@ function scrollAnnouncement(){
   const b=aliveBases[annIndex%aliveBases.length];
 
   if(b.dataset.enemies==0){ announcementText.style.color="#00ff7f"; announcementText.textContent=`${b.dataset.id} 防衛完了！`; }
-  else if(b.dataset.hp>50){ announcementText.style.color="#7fe8ff"; announcementText.textContent=`${b.dataset.id} 防衛中`; }
+  else if(b.dataset.hp>50){ announcementText.style.color="#7fe8ff"; announcementText.textContent=`${b.dataset.id} 防衛中、安定しています`; }
   else{ announcementText.style.color="#ff4b4b"; announcementText.textContent=`${b.dataset.id} 緊急！救援要請！`; }
 
   announcementText.style.transition="none";
