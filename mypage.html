@@ -1,33 +1,162 @@
-<h2>マイページ</h2>
-<label>名前: <input type="text" id="nameInput"></label><br>
-<label>プロフィール: <input type="text" id="profileInput"></label><br>
-<div id="iconInputs"></div>
-<button id="addIconBtn">アイコン追加</button>
-<button id="saveBtn">保存</button>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>マイページ - キャラクター編集</title>
+<style>
+body {
+  margin:0;
+  font-family:"Consolas","Roboto Mono",monospace;
+  background:#000;
+  color:#e0e0e0;
+  display:flex;
+  flex-direction:column;
+}
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 20px;
+  background:#111;
+  border-bottom:1px solid #444;
+}
+header h1 { font-size:1.2em; color:#8ae1ff; }
+nav a { color:#8ae1ff; margin-left:12px; text-decoration:none; transition:0.3s; }
+nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
+
+main { padding:20px; flex:1; overflow-y:auto; }
+h2 { color:#8ae1ff; }
+label { display:block; margin:8px 0 4px; }
+input[type=text], textarea { width:100%; padding:6px; background:#222; border:1px solid #555; color:#e0e0e0; border-radius:4px; }
+textarea { resize:vertical; }
+
+.url-group { display:flex; align-items:center; margin-bottom:4px; }
+.url-group input { flex:1; }
+.url-group button { margin-left:4px; padding:4px 8px; background:#111; border:1px solid #8ae1ff; color:#8ae1ff; cursor:pointer; }
+.url-group button:hover { background:#8ae1ff; color:#000; }
+
+button.save-btn { margin-top:12px; padding:8px 12px; background:#111; border:1px solid #8ae1ff; color:#8ae1ff; cursor:pointer; }
+button.save-btn:hover { background:#8ae1ff; color:#000; }
+
+#icon-preview, #sprite-preview { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+#icon-preview img, #sprite-preview img { width:60px; height:60px; object-fit:cover; border:1px solid #555; border-radius:4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>マイページ - キャラクター編集</h1>
+  <nav>
+    <a href="index.html">🏠 トップ</a>
+    <a href="defense.html">🛡 防衛</a>
+    <a href="craft.html">⚒ クラフト</a>
+    <a href="items.html">🎒 アイテム</a>
+  </nav>
+</header>
+
+<main>
+  <h2>プロフィール情報</h2>
+  <label>キャラクター名</label>
+  <input type="text" id="charName">
+
+  <label>プロフィール文</label>
+  <textarea id="charProfile" rows="3"></textarea>
+
+  <label>トップページに表示する一言</label>
+  <input type="text" id="charTagline">
+
+  <h2>アイコンURL（初期10枠）</h2>
+  <div id="icon-container"></div>
+  <button id="add-icon">➕ アイコン追加</button>
+  <div id="icon-preview"></div>
+
+  <h2>立ち絵URL（初期10枠）</h2>
+  <div id="sprite-container"></div>
+  <button id="add-sprite">➕ 立ち絵追加</button>
+  <div id="sprite-preview"></div>
+
+  <button class="save-btn" id="saveBtn">💾 保存</button>
+</main>
 
 <script>
-const currentCharName = localStorage.getItem("currentChar");
-const allChars = JSON.parse(localStorage.getItem("characters")||"[]");
-const currentChar = allChars.find(c=>c.name===currentCharName);
+const MAX_INITIAL = 10;
 
-const iconInputsDiv = document.getElementById("iconInputs");
+// 初期データロード
+let charData = JSON.parse(localStorage.getItem("currentChar")) || {
+  name:"",
+  profile:"",
+  tagline:"",
+  icons:Array(MAX_INITIAL).fill(""),
+  sprites:Array(MAX_INITIAL).fill("")
+};
 
-function renderIconInputs(){
-  iconInputsDiv.innerHTML="";
-  for(let i=0;i<10;i++){
-    const val = currentChar.iconUrls[i]||"";
-    iconInputsDiv.innerHTML += `<input type="text" placeholder="アイコンURL" value="${val}"><br>`;
-  }
+const charName = document.getElementById("charName");
+const charProfile = document.getElementById("charProfile");
+const charTagline = document.getElementById("charTagline");
+const iconContainer = document.getElementById("icon-container");
+const spriteContainer = document.getElementById("sprite-container");
+const iconPreview = document.getElementById("icon-preview");
+const spritePreview = document.getElementById("sprite-preview");
+
+function createInput(container, array, type){
+  container.innerHTML="";
+  array.forEach((val,i)=>{
+    const group = document.createElement("div");
+    group.className="url-group";
+    const input = document.createElement("input");
+    input.type="text";
+    input.value = val;
+    input.placeholder = type==="icon"?"アイコンURL":"立ち絵URL";
+    input.oninput = ()=>{ array[i] = input.value; updatePreview(type); };
+    const delBtn = document.createElement("button");
+    delBtn.textContent="❌";
+    delBtn.onclick = ()=>{ array[i] = ""; input.value=""; updatePreview(type); };
+    group.appendChild(input);
+    group.appendChild(delBtn);
+    container.appendChild(group);
+  });
+  updatePreview(type);
 }
-renderIconInputs();
 
-document.getElementById("saveBtn").onclick=()=>{
-  currentChar.name = document.getElementById("nameInput").value;
-  currentChar.profile = document.getElementById("profileInput").value;
-  currentChar.iconUrls=[];
-  const inputs = iconInputsDiv.querySelectorAll("input");
-  inputs.forEach(inp=>{ if(inp.value) currentChar.iconUrls.push(inp.value); });
-  localStorage.setItem("characters",JSON.stringify(allChars));
-  alert("保存しました");
+function updatePreview(type){
+  const preview = type==="icon"?iconPreview:spritePreview;
+  const arr = type==="icon"?charData.icons:charData.sprites;
+  preview.innerHTML="";
+  arr.forEach(url=>{
+    if(url.trim()!==""){
+      const img = document.createElement("img");
+      img.src=url;
+      preview.appendChild(img);
+    }
+  });
+}
+
+// 初期10枠生成
+createInput(iconContainer,charData.icons,"icon");
+createInput(spriteContainer,charData.sprites,"sprite");
+
+// 追加ボタン
+document.getElementById("add-icon").onclick = ()=>{
+  charData.icons.push("");
+  createInput(iconContainer,charData.icons,"icon");
+};
+document.getElementById("add-sprite").onclick = ()=>{
+  charData.sprites.push("");
+  createInput(spriteContainer,charData.sprites,"sprite");
+};
+
+// フォーム反映
+charName.value = charData.name;
+charProfile.value = charData.profile;
+charTagline.value = charData.tagline;
+
+// 保存ボタン
+document.getElementById("saveBtn").onclick = ()=>{
+  charData.name = charName.value;
+  charData.profile = charProfile.value;
+  charData.tagline = charTagline.value;
+  localStorage.setItem("currentChar",JSON.stringify(charData));
+  alert("保存しました！");
 };
 </script>
+</body>
+</html>
