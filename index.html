@@ -77,4 +77,61 @@ fetch("header.html")
   });
 
 // ---- 防衛マップ描画 ----
-const map =
+const map = document.getElementById('map');
+const announcements = document.getElementById('announcements');
+
+// 拠点データ
+const bases = [
+  { id: 'official1', x: 100, y: 100, type: 'official', name: '学園本部', faces: ['A','B'] },
+  { id: 'user1', x: 300, y: 150, type: 'user', name: 'カフェ', faces: ['C'] },
+  { id: 'user2', x: 120, y: 280, type: 'user', name: '研究室', faces: ['D','E'] }
+];
+
+// マップに拠点配置
+bases.forEach(b => {
+  const div = document.createElement('div');
+  div.className = 'base ' + b.type;
+  div.style.left = b.x + 'px';
+  div.style.top = b.y + 'px';
+  div.textContent = b.name[0];
+  b.faces.forEach(f => {
+    const fdiv = document.createElement('span');
+    fdiv.className = 'face';
+    fdiv.title = f;
+    div.appendChild(fdiv);
+  });
+  map.appendChild(div);
+});
+
+// 拠点を結ぶ線
+function drawLine(x1, y1, x2, y2){
+  const line = document.createElement('div');
+  line.className = 'arrow';
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const length = Math.sqrt(dx*dx + dy*dy);
+  line.style.width = length + 'px';
+  line.style.left = x1 + 'px';
+  line.style.top = y1 + 'px';
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  line.style.transform = `rotate(${angle}deg)`;
+  map.appendChild(line);
+}
+drawLine(120,120,320,170);
+drawLine(120,120,140,300);
+
+// アナウンス
+const logs = [
+  '学園本部防衛完了！',
+  'カフェに増援到着！',
+  '研究室撤退まであと2日！'
+];
+logs.forEach(l => {
+  const p = document.createElement('p');
+  p.textContent = l;
+  announcements.appendChild(p);
+});
+</script>
+
+</body>
+</html>
