@@ -134,7 +134,7 @@ for(let i=0;i<numBases;i++){
 // 円陣配置
 function positionBases(){
   const centerX=map.offsetWidth/2;
-  const centerY=map.offsetHeight/2 + 170;
+  const centerY=map.offsetHeight/2 + 230;
   bases.forEach((base,i)=>{
     if(i===0){ base.style.left=`${centerX-27.5}px`; base.style.top=`${centerY-27.5}px`; return; }
     const angle=(i/19)*2*Math.PI;
