@@ -1,176 +1,115 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>防衛画面</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: radial-gradient(circle at center, #0a0f1a, #05060a);
-      color: #fff;
-      font-family: "Segoe UI", sans-serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: rgba(0, 0, 20, 0.8);
-      color: #00c3ff;
-      text-align: center;
-      padding: 10px 0;
-      font-size: 1.3em;
-      letter-spacing: 1px;
-      box-shadow: 0 2px 10px rgba(0, 200, 255, 0.3);
-    }
-
-    .battlefield {
-      position: relative;
-      width: 80vw;
-      height: 70vh;
-      margin-top: 5vh;
-    }
-
-    .base {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      background: radial-gradient(circle at 30% 30%, #009dff, #003366);
-      border: 2px solid #00c3ff;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      font-size: 1.1em;
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .base:hover {
-      transform: scale(1.2);
-      box-shadow: 0 0 20px #00bfff;
-    }
-
-    .announcement {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: rgba(0, 10, 30, 0.8);
-      color: #00eaff;
-      text-align: center;
-      padding: 15px 0;
-      font-size: 1.1em;
-      border-top: 1px solid #0077aa;
-      letter-spacing: 1px;
-      box-shadow: 0 -2px 10px rgba(0, 255, 255, 0.2);
-    }
-  </style>
+<meta charset="UTF-8">
+<title>防衛戦マップ</title>
+<style>
+body { font-family: sans-serif; margin: 0; padding: 0; background: #e0f7fa; overflow: hidden; }
+#map { position: relative; width: 100%; height: 80vh; }
+.base {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  position: absolute; text-align: center; line-height: 50px;
+  color: #fff; font-weight: bold;
+  background: #1976d2;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+#announcements {
+  height: 20vh; background: #fafafa;
+  overflow-y: auto; padding: 10px;
+  border-top: 2px solid #ccc;
+  font-size: 14px;
+}
+.hp-bar {
+  position: absolute;
+  bottom: -8px; left: 0;
+  height: 5px; border-radius: 2px;
+  background: limegreen;
+}
+</style>
 </head>
 <body>
-  <header>🛡 防衛作戦エリア：戦況モニター</header>
-  <div class="battlefield" id="battlefield"></div>
-  <div class="announcement" id="announcement">戦況データをロード中……</div>
+<div id="map"></div>
+<div id="announcements"></div>
 
-  <script>
-    const battlefield = document.getElementById('battlefield');
-    const announcement = document.getElementById('announcement');
-    const baseCount = 20;
-    const radius = 250;
-    const centerX = battlefield.clientWidth / 2;
-    const centerY = battlefield.clientHeight / 1.4;
+<script>
+const map = document.getElementById('map');
+const announcements = document.getElementById('announcements');
 
-    const bases = [];
+// ===== 拠点データ初期化 =====
+const baseCount = 20;
+const centerX = window.innerWidth / 2;
+const centerY = window.innerHeight * 0.6;
+const radius = 250;
 
-    // --- 拠点生成 ---
-    for (let i = 0; i < baseCount; i++) {
-      const angle = (i / baseCount) * 2 * Math.PI;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
+let bases = [];
+for (let i = 0; i < baseCount; i++) {
+  const angle = (i / baseCount) * 2 * Math.PI;
+  const x = centerX + radius * Math.cos(angle);
+  const y = centerY + radius * Math.sin(angle);
+  const div = document.createElement('div');
+  div.className = 'base';
+  div.style.left = (x - 25) + 'px';
+  div.style.top = (y - 25) + 'px';
+  div.textContent = i + 1;
 
-      const base = document.createElement('div');
-      base.className = 'base';
-      base.style.left = `${x - 30}px`;
-      base.style.top = `${y - 30}px`;
-      base.textContent = i + 1;
-      base.dataset.hp = 100;
+  const hpBar = document.createElement('div');
+  hpBar.className = 'hp-bar';
+  hpBar.style.width = '100%';
+  div.appendChild(hpBar);
 
-      base.addEventListener('click', () => {
-        // HP減少
-        let hp = Math.max(0, base.dataset.hp - Math.floor(Math.random() * 30 + 10));
-        base.dataset.hp = hp;
+  map.appendChild(div);
+  bases.push({
+    id: i + 1,
+    el: div,
+    hp: 100,
+    prevHp: 100,
+    bar: hpBar
+  });
+}
 
-        let statusText;
-        if (hp > 70) {
-          statusText = `拠点${i + 1}：防衛順調です！`;
-        } else if (hp > 40) {
-          statusText = `拠点${i + 1}：被害発生、支援要請中！`;
-        } else if (hp > 0) {
-          statusText = `拠点${i + 1}：危険！防衛線が崩壊寸前！`;
-        } else {
-          statusText = `拠点${i + 1}：陥落……！`;
-          base.style.background = 'radial-gradient(circle at 30% 30%, #400000, #220000)';
-          base.style.borderColor = '#ff0000';
-        }
+// ===== アナウンス関数 =====
+function log(msg) {
+  const p = document.createElement('p');
+  p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  announcements.prepend(p);
+  if (announcements.children.length > 50) {
+    announcements.removeChild(announcements.lastChild);
+  }
+}
 
-        announcement.textContent = statusText;
-      });
+// ===== 戦況更新（10秒ごと） =====
+function updateBattle() {
+  bases.forEach(b => {
+    // HP変化をランダムにシミュレート
+    const change = Math.floor(Math.random() * 30) - 10; // -10〜+20の変化
+    b.prevHp = b.hp;
+    b.hp = Math.min(100, Math.max(0, b.hp + change));
 
-      bases.push(base);
-      battlefield.appendChild(base);
+    // HPバー更新
+    b.bar.style.width = b.hp + '%';
+    b.bar.style.background = b.hp > 60 ? 'limegreen' :
+                             b.hp > 30 ? 'orange' : 'red';
+
+    // 状況変化アナウンス
+    if (b.hp < b.prevHp) {
+      if (b.hp === 0) log(`拠点${b.id}：陥落……！`);
+      else if (b.hp < 30) log(`拠点${b.id}：防衛限界！`);
+      else log(`拠点${b.id}：被害発生！`);
+    } else if (b.hp > b.prevHp) {
+      const diff = b.hp - b.prevHp;
+      if (diff > 30) log(`拠点${b.id}：防衛線再構築完了！`);
+      else log(`拠点${b.id}：防衛線が持ち直しました！`);
+    } else {
+      if (b.hp > 70) log(`拠点${b.id}：防衛順調。`);
     }
+  });
+}
 
-    // --- 自動戦況アナウンス更新（1時間ごと） ---
-    function updateGlobalAnnouncement() {
-      const totalHP = bases.reduce((sum, b) => sum + parseInt(b.dataset.hp), 0);
-      const avgHP = totalHP / baseCount;
-      let message;
-
-      if (avgHP > 75) {
-        const msgs = [
-          "全拠点に異常なし。防衛は安定しています。",
-          "前線は静穏。警戒を続けてください。",
-          "防衛線に揺らぎなし。士気高く保たれています。"
-        ];
-        message = msgs[Math.floor(Math.random() * msgs.length)];
-      } else if (avgHP > 50) {
-        const msgs = [
-          "数拠点で軽微な損傷。応急対応を実施中。",
-          "小規模な揺らぎを検知。追加補給を推奨します。",
-          "防衛網に軽度の乱れあり、再編成を検討中。"
-        ];
-        message = msgs[Math.floor(Math.random() * msgs.length)];
-      } else if (avgHP > 25) {
-        const msgs = [
-          "被害拡大中、前線の再強化を急いでください。",
-          "複数拠点が危険域。救援部隊を要請中！",
-          "前線が不安定。戦況は厳しい状況です。"
-        ];
-        message = msgs[Math.floor(Math.random() * msgs.length)];
-      } else {
-        const msgs = [
-          "防衛線崩壊寸前……生存者の確保を最優先に。",
-          "残存勢力わずか。全員退避を検討してください。",
-          "最後の砦が耐えています……希望を捨てるな。"
-        ];
-        message = msgs[Math.floor(Math.random() * msgs.length)];
-      }
-
-      announcement.textContent = `[自動報告] ${message}`;
-    }
-
-    // 初期メッセージ
-    announcement.textContent = '防衛エリア展開完了。各拠点へのアクセスが可能です。';
-
-    // 1時間ごとに自動更新（3600000ms）
-    setInterval(updateGlobalAnnouncement, 3600000);
-  </script>
+// 初回実行＋定期更新
+updateBattle();
+setInterval(updateBattle, 10000); // ← 10秒ごと（本番は3600000＝1時間）
+</script>
 </body>
 </html>
