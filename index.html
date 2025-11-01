@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>防衛線マップ</title>
+<title>防衛線マップ（円陣配置）</title>
 <style>
 body {
   font-family: sans-serif;
@@ -16,10 +16,9 @@ body {
 #map {
   position: relative;
   width: 100%;
-  height: 70vh;
+  height: 80vh;
   background: #e0f7fa;
-  border-top: 2px solid #90a4ae;
-  border-bottom: 2px solid #90a4ae;
+  overflow: hidden;
 }
 .base {
   width: 40px;
@@ -33,12 +32,6 @@ body {
 }
 .official { background: #ff5722; }
 .user { background: #4caf50; }
-.arrow {
-  position: absolute;
-  width: 2px;
-  background: black;
-  transform-origin: top left;
-}
 #announcements {
   height: 20vh;
   background: #fafafa;
@@ -47,8 +40,8 @@ body {
   border-top: 1px solid #ccc;
 }
 .face {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   display: inline-block;
   background: #ffeb3b;
@@ -59,79 +52,70 @@ body {
 </head>
 <body>
 
-<!-- ヘッダー -->
 <div id="header-container"></div>
-
-<!-- マップ領域 -->
 <div id="map"></div>
-
-<!-- アナウンス領域 -->
 <div id="announcements"></div>
 
 <script>
-// 共通ヘッダーを読み込み
+// 共通ヘッダー読み込み
 fetch("header.html")
   .then(res => res.text())
   .then(html => {
     document.getElementById("header-container").innerHTML = html;
   });
 
-// ---- 防衛マップ描画 ----
-const map = document.getElementById('map');
-const announcements = document.getElementById('announcements');
+// === 防衛マップ ===
+const map = document.getElementById("map");
+const announcements = document.getElementById("announcements");
 
-// 拠点データ
-const bases = [
-  { id: 'official1', x: 100, y: 100, type: 'official', name: '学園本部', faces: ['A','B'] },
-  { id: 'user1', x: 300, y: 150, type: 'user', name: 'カフェ', faces: ['C'] },
-  { id: 'user2', x: 120, y: 280, type: 'user', name: '研究室', faces: ['D','E'] }
-];
+// 中心点
+const centerX = window.innerWidth / 2;
+const centerY = window.innerHeight * 0.35;
 
-// マップに拠点配置
-bases.forEach(b => {
-  const div = document.createElement('div');
-  div.className = 'base ' + b.type;
-  div.style.left = b.x + 'px';
-  div.style.top = b.y + 'px';
+// 学園本部（中央）
+const officialBase = { id: "official1", x: centerX - 20, y: centerY - 20, type: "official", name: "学園本部", faces: ["静海", "宝楽"] };
+createBase(officialBase);
+
+// ユーザー拠点（円形に配置）
+const numBases = 20;
+const radius = 250;
+for (let i = 0; i < numBases; i++) {
+  const angle = (i / numBases) * 2 * Math.PI;
+  const x = centerX + radius * Math.cos(angle) - 20;
+  const y = centerY + radius * Math.sin(angle) - 20;
+  const base = {
+    id: "user" + (i + 1),
+    x, y,
+    type: "user",
+    name: "拠点" + (i + 1),
+    faces: []
+  };
+  createBase(base);
+}
+
+// === 関数 ===
+function createBase(b) {
+  const div = document.createElement("div");
+  div.className = "base " + b.type;
+  div.style.left = b.x + "px";
+  div.style.top = b.y + "px";
   div.textContent = b.name[0];
   b.faces.forEach(f => {
-    const fdiv = document.createElement('span');
-    fdiv.className = 'face';
+    const fdiv = document.createElement("span");
+    fdiv.className = "face";
     fdiv.title = f;
     div.appendChild(fdiv);
   });
   map.appendChild(div);
-});
-
-// 拠点を結ぶ線
-function drawLine(x1, y1, x2, y2){
-  const line = document.createElement('div');
-  line.className = 'arrow';
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const length = Math.sqrt(dx*dx + dy*dy);
-  line.style.width = length + 'px';
-  line.style.left = x1 + 'px';
-  line.style.top = y1 + 'px';
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-  line.style.transform = `rotate(${angle}deg)`;
-  map.appendChild(line);
 }
-drawLine(120,120,320,170);
-drawLine(120,120,140,300);
 
-// アナウンス
+// === アナウンス ===
 const logs = [
-  '学園本部防衛完了！',
-  'カフェに増援到着！',
-  '研究室撤退まであと2日！'
+  "防衛線起動 — 各拠点、戦闘準備を開始！",
+  "北東拠点に敵影確認！",
+  "学園本部、防衛魔術展開完了！"
 ];
 logs.forEach(l => {
-  const p = document.createElement('p');
+  const p = document.createElement("p");
   p.textContent = l;
-  announcements.appendChild(p);
-});
-</script>
-
-</body>
-</html>
+  announcements.a
