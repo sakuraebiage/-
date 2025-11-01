@@ -5,73 +5,105 @@
 <title>防衛戦マップ</title>
 <style>
 body { font-family: sans-serif; margin: 0; padding: 0; }
-#map { position: relative; width: 100%; height: 80vh; background: #e0f7fa; }
+h1 { margin: 10px; }
+a { margin-left: 10px; }
+#container { display: flex; height: 80vh; }
+#map { flex: 3; position: relative; background: #e0f7fa; }
+#statusPanel { flex: 1; padding: 10px; background: #fafafa; border-left: 1px solid #ccc; overflow-y: auto; }
 .base { width: 40px; height: 40px; border-radius: 50%; position: absolute; text-align: center; line-height: 40px; color: #fff; font-weight: bold; }
 .official { background: #ff5722; }
 .user { background: #4caf50; }
-.arrow { position: absolute; width: 2px; background: black; transform-origin: top left; }
-#announcements { height: 20vh; background: #fafafa; overflow-y: auto; padding: 10px; border-top: 1px solid #ccc; }
 .face { width: 20px; height: 20px; border-radius: 50%; display: inline-block; background: #ffeb3b; margin-right: 2px; vertical-align: middle; }
+#announcements { height: 20vh; background: #fafafa; overflow-y: auto; padding: 10px; border-top: 1px solid #ccc; }
 </style>
 </head>
 <body>
 
-<h1>防衛戦マップ</h1>
-<a href="../index.html">トップに戻る</a>
+<h1>防衛戦マップ <a href="../index.html">トップに戻る</a></h1>
 
-<div id="map"></div>
+<div id="container">
+  <div id="map"></div>
+  <div id="statusPanel">
+    <h3>拠点状況</h3>
+    <div id="baseStatus"></div>
+  </div>
+</div>
+
 <div id="announcements"></div>
 
 <script>
 const map = document.getElementById('map');
+const baseStatusDiv = document.getElementById('baseStatus');
 const announcements = document.getElementById('announcements');
 
-// 拠点円陣データ（メイン円陣用）
+// 円陣拠点データ
 const centerX = 400, centerY = 300, radius = 150;
 const numBases = 20;
 const bases = [];
 
-// 円陣生成
 for(let i=0;i<numBases;i++){
   const angle = 2*Math.PI/numBases*i;
   const x = centerX + radius * Math.cos(angle);
   const y = centerY + radius * Math.sin(angle);
-  bases.push({id:'b'+i, x, y, type:'user', name:'拠点'+(i+1), faces:['A'+i]} );
+  bases.push({id:'b'+i, x, y, type:'user', name:'拠点'+(i+1), faces:['A'+i], hp:100, resource:0, enemy:10});
 }
 
-// マップに拠点配置
+// マップに配置
 bases.forEach(b => {
   const div = document.createElement('div');
   div.className = 'base ' + b.type;
-  div.style.left = (b.x-20) + 'px';
-  div.style.top = (b.y-20) + 'px';
+  div.style.left = (b.x-20)+'px';
+  div.style.top = (b.y-20)+'px';
   div.innerHTML = b.name[0];
   b.faces.forEach(f=>{
     const fdiv = document.createElement('span');
-    fdiv.className = 'face';
-    fdiv.title = f;
+    fdiv.className='face';
+    fdiv.title=f;
     div.appendChild(fdiv);
   });
   map.appendChild(div);
 });
 
-// 簡易アナウンス
-const logs = [
-  '防衛戦開始！',
-  '拠点の残存HP: 全部100%'
-];
+// 拠点ステータス描画
+function renderStatus(){
+  baseStatusDiv.innerHTML='';
+  bases.forEach(b=>{
+    const div = document.createElement('div');
+    div.style.marginBottom='8px';
+    div.innerHTML = `<strong>${b.name}</strong><br>
+                     HP: ${b.hp}%<br>
+                     リソース: ${b.resource}<br>
+                     残敵: ${b.enemy}`;
+    baseStatusDiv.appendChild(div);
+  });
+}
+
+// アナウンス描画
+let logs = ['防衛戦開始！'];
 function updateLogs(){
-  announcements.innerHTML = '';
+  announcements.innerHTML='';
   logs.forEach(l=>{
     const p = document.createElement('p');
-    p.textContent = l;
+    p.textContent=l;
     announcements.appendChild(p);
   });
 }
+
+// テスト用：5秒ごとにHPランダム減少とリソース増加
+setInterval(()=>{
+  bases.forEach(b=>{
+    b.hp = Math.max(0, b.hp - Math.floor(Math.random()*5));
+    b.resource += Math.floor(Math.random()*3);
+  });
+  renderStatus();
+  logs = bases.map(b=>`${b.name} HP:${b.hp}% 残敵:${b.enemy}`);
+  updateLogs();
+},5000);
+
+// 初回描画
+renderStatus();
 updateLogs();
 
-// 1時間ごと更新（テスト用は10秒にしてもOK）
-setInterval(updateLogs, 3600000);
 </script>
 
 </body>
