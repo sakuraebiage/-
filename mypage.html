@@ -15,73 +15,42 @@ button:hover { background:#8ae1ff; color:#000; }
 <body>
 <h1>マイページ</h1>
 
-<label>キャラ選択:
-  <select id="charSelect"></select>
-</label>
-
-<label>名前変更:
-  <input type="text" id="nameInput">
-</label>
-
-<label>プロフィール:
-  <textarea id="profileInput" placeholder="プロフィールを入力"></textarea>
-</label>
-
-<label>トップページ用一言:
-  <input type="text" id="taglineInput" placeholder="キャラカードに表示される一言">
-</label>
-
-<label>アイコン URL (120x120 推奨):
-  <input type="text" id="iconUrl">
-</label>
-
-<label>立ち絵 URL (700x800 推奨):
-  <input type="text" id="spriteUrl">
-</label>
-
+<div id="charForms"></div>
 <button id="saveBtn">保存</button>
 <button onclick="window.location.href='index.html'">トップへ戻る</button>
 
 <script>
-const select = document.getElementById("charSelect");
-let chars = JSON.parse(localStorage.getItem("characters")||"[]");
-chars.forEach((c,i)=>select.add(new Option(c.name,i)));
+let chars = JSON.parse(localStorage.getItem("characters") || "[]");
 
-function loadCharData(index){
-  const c = chars[index];
-  document.getElementById("nameInput").value = c.name;
-  document.getElementById("profileInput").value = c.profile || "";
-  document.getElementById("taglineInput").value = c.tagline || "";
-  document.getElementById("iconUrl").value = c.icon || "";
-  document.getElementById("spriteUrl").value = c.sprite || "";
+// デフォルト10キャラ枠
+while(chars.length < 10) {
+  chars.push({name:'', profile:'', tagline:'', icon:'', sprite:''});
 }
-loadCharData(0);
 
-select.addEventListener("change", ()=> loadCharData(select.value));
+const container = document.getElementById("charForms");
+
+chars.forEach((c,i)=>{
+  const div = document.createElement("div");
+  div.innerHTML = `
+    <h3>キャラ ${i+1}</h3>
+    <label>名前: <input type="text" class="name" value="${c.name}"></label>
+    <label>プロフィール: <textarea class="profile">${c.profile}</textarea></label>
+    <label>一言: <input type="text" class="tagline" value="${c.tagline}"></label>
+    <label>アイコンURL: <input type="text" class="icon" value="${c.icon}"></label>
+    <label>立ち絵URL: <input type="text" class="sprite" value="${c.sprite}"></label>
+    <hr>
+  `;
+  container.appendChild(div);
+});
 
 document.getElementById("saveBtn").addEventListener("click", ()=>{
-  const c = chars[select.value];
-  c.name = document.getElementById("nameInput").value;
-  c.profile = document.getElementById("profileInput").value;
-  c.tagline = document.getElementById("taglineInput").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.icon = document.getElementById("iconUrl").value;
-  c.sprite = document.getElementById("spriteUrl").value;
-
+  document.querySelectorAll('#charForms div').forEach((div,i)=>{
+    chars[i].name = div.querySelector('.name').value;
+    chars[i].profile = div.querySelector('.profile').value;
+    chars[i].tagline = div.querySelector('.tagline').value;
+    chars[i].icon = div.querySelector('.icon').value;
+    chars[i].sprite = div.querySelector('.sprite').value;
+  });
   localStorage.setItem("characters", JSON.stringify(chars));
   alert("保存しました！");
 });
