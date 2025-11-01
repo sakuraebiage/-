@@ -7,9 +7,8 @@
 body {
   margin:0;
   font-family:"Consolas","Roboto Mono",monospace;
-  background: radial-gradient(circle at 50% 60%, #1a1a1a 0%, #000 100%);
+  background:#000;
   color:#e0e0e0;
-  overflow:hidden;
   display:flex;
   flex-direction:column;
 }
@@ -18,16 +17,11 @@ header {
   justify-content:space-between;
   align-items:center;
   padding:10px 20px;
-  background:rgba(30,30,30,0.85);
+  background:#111;
   border-bottom:1px solid #444;
 }
 header h1 { font-size:1.2em; color:#8ae1ff; }
-nav a {
-  color:#8ae1ff;
-  margin-left:12px;
-  text-decoration:none;
-  transition:0.3s;
-}
+nav a { color:#8ae1ff; margin-left:12px; text-decoration:none; transition:0.3s; }
 nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 
 #announcement {
@@ -40,9 +34,7 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
   margin-top:5px;
   color:#7fe8ff;
 }
-.scroll-text {
-  display:inline-block;
-}
+.scroll-text { display:inline-block; }
 
 #main-container { display:flex; flex:1; }
 #map {
@@ -54,7 +46,7 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 }
 #status-panel {
   width:280px;
-  background:rgba(30,30,30,0.8);
+  background:#111;
   border-left:1px solid #555;
   padding:10px;
   overflow-y:auto;
@@ -71,6 +63,7 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
   display:flex; justify-content:center; align-items:center;
   font-size:0.8em;
   color:#8ae1ff;
+  cursor:pointer;
   transition:all 0.5s ease;
 }
 .hp-bar {
@@ -83,6 +76,36 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
   border-radius:2px;
 }
 .hp-fill { height:100%; border-radius:2px; background:#00ff9d; }
+
+/* モーダル */
+.modal-bg {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;
+  z-index:100;
+}
+.modal-content {
+  background:#222;
+  padding:20px;
+  border:2px solid #8ae1ff;
+  border-radius:8px;
+  text-align:center;
+}
+.modal-content button {
+  margin:5px;
+  padding:8px 12px;
+  background:#111;
+  border:1px solid #8ae1ff;
+  color:#8ae1ff;
+  cursor:pointer;
+}
+.modal-content button:hover {
+  background:#8ae1ff; color:#000;
+}
 </style>
 </head>
 <body>
@@ -102,10 +125,23 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
   <div id="status-panel"></div>
 </div>
 
+<!-- モーダル -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-content" id="modalContent">
+    <h3 id="modalTitle"></h3>
+    <button onclick="alert('戦闘へ移動')">⚔ 戦闘</button>
+    <button onclick="alert('探索へ移動')">🧭 探索</button>
+    <button onclick="alert('救助へ移動')">🩹 救助</button>
+    <button onclick="alert('戦績を見る')">📊 戦績</button>
+  </div>
+</div>
+
 <script>
 const map = document.getElementById("map");
 const statusPanel = document.getElementById("status-panel");
 const announcementText = document.getElementById("announcementText");
+const modalBg = document.getElementById("modalBg");
+const modalTitle = document.getElementById("modalTitle");
 
 const bases = [];
 const numBases = 20;
@@ -129,12 +165,23 @@ for(let i=0;i<numBases;i++){
   base.appendChild(hpBar);
   map.appendChild(base);
   bases.push(base);
+
+  // クリックでモーダル表示
+  base.addEventListener("click", ()=>{
+    modalBg.style.display="flex";
+    modalTitle.textContent=base.dataset.id;
+  });
 }
+
+// モーダル閉じる
+modalBg.addEventListener("click",(e)=>{
+  if(e.target===modalBg) modalBg.style.display="none";
+});
 
 // 円陣配置
 function positionBases(){
   const centerX=map.offsetWidth/2;
-  const centerY=map.offsetHeight/2 + 230;
+  const centerY=map.offsetHeight/2 + 50;
   bases.forEach((base,i)=>{
     if(i===0){ base.style.left=`${centerX-27.5}px`; base.style.top=`${centerY-27.5}px`; return; }
     const angle=(i/19)*2*Math.PI;
@@ -194,7 +241,7 @@ function scrollAnnouncement(){
   const b=aliveBases[annIndex%aliveBases.length];
 
   if(b.dataset.enemies==0){ announcementText.style.color="#00ff7f"; announcementText.textContent=`${b.dataset.id} 敵の撤退を確認、防衛完了！`; }
-  else if(b.dataset.hp>50){ announcementText.style.color="#7fe8ff"; announcementText.textContent=`${b.dataset.id} 防衛中、戦線安定しています`; }
+  else if(b.dataset.hp>50){ announcementText.style.color="#7fe8ff"; announcementText.textContent=`${b.dataset.id} 防衛中、戦線安定`; }
   else{ announcementText.style.color="#ff4b4b"; announcementText.textContent=`${b.dataset.id} 緊急！救援要請！`; }
 
   announcementText.style.transition="none";
