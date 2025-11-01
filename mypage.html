@@ -5,22 +5,40 @@
 <title>マイページ</title>
 <style>
 body { font-family:"Roboto","Consolas",monospace; background:#000; color:#fff; padding:20px; }
-input, button { margin:5px; padding:5px; }
+label { display:block; margin:8px 0; }
+input, textarea, button { margin:5px 0; padding:5px; width:300px; }
+textarea { height:60px; }
 button { cursor:pointer; background:#111; border:1px solid #8ae1ff; color:#8ae1ff; }
 button:hover { background:#8ae1ff; color:#000; }
 </style>
 </head>
 <body>
 <h1>マイページ</h1>
+
 <label>キャラ選択:
   <select id="charSelect"></select>
-</label><br>
-<label>アイコン (120x120):
-  <input type="file" id="iconFile">
-</label><br>
-<label>立ち絵 (700x800):
-  <input type="file" id="spriteFile">
-</label><br>
+</label>
+
+<label>名前変更:
+  <input type="text" id="nameInput">
+</label>
+
+<label>プロフィール:
+  <textarea id="profileInput" placeholder="プロフィールを入力"></textarea>
+</label>
+
+<label>トップページ用一言:
+  <input type="text" id="taglineInput" placeholder="キャラカードに表示される一言">
+</label>
+
+<label>アイコン URL (120x120 推奨):
+  <input type="text" id="iconUrl">
+</label>
+
+<label>立ち絵 URL (700x800 推奨):
+  <input type="text" id="spriteUrl">
+</label>
+
 <button id="saveBtn">保存</button>
 <button onclick="window.location.href='index.html'">トップへ戻る</button>
 
@@ -29,14 +47,27 @@ const select = document.getElementById("charSelect");
 let chars = JSON.parse(localStorage.getItem("characters")||"[]");
 chars.forEach((c,i)=>select.add(new Option(c.name,i)));
 
-document.getElementById("saveBtn").addEventListener("click",()=>{
+function loadCharData(index){
+  const c = chars[index];
+  document.getElementById("nameInput").value = c.name;
+  document.getElementById("profileInput").value = c.profile || "";
+  document.getElementById("taglineInput").value = c.tagline || "";
+  document.getElementById("iconUrl").value = c.icon || "";
+  document.getElementById("spriteUrl").value = c.sprite || "";
+}
+loadCharData(0);
+
+select.addEventListener("change", ()=> loadCharData(select.value));
+
+document.getElementById("saveBtn").addEventListener("click", ()=>{
   const c = chars[select.value];
-  const icon = document.getElementById("iconFile").files[0];
-  const sprite = document.getElementById("spriteFile").files[0];
+  c.name = document.getElementById("nameInput").value;
+  c.profile = document.getElementById("profileInput").value;
+  c.tagline = document.getElementById("taglineInput").value;
+  c.icon = document.getElementById("iconUrl").value;
+  c.sprite = document.getElementById("spriteUrl").value;
 
-  if(icon){ const reader = new FileReader(); reader.onload=e=>{ c.icon=e.target.result; localStorage.setItem("characters", JSON.stringify(chars)); }; reader.readAsDataURL(icon);}
-  if(sprite){ const reader = new FileReader(); reader.onload=e=>{ c.sprite=e.target.result; localStorage.setItem("characters", JSON.stringify(chars)); }; reader.readAsDataURL(sprite);}
-
+  localStorage.setItem("characters", JSON.stringify(chars));
   alert("保存しました！");
 });
 </script>
