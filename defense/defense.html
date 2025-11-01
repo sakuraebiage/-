@@ -3,144 +3,195 @@
 <head>
 <meta charset="UTF-8">
 <title>防衛戦マップ</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <style>
-body { font-family: sans-serif; margin:0; padding:0; display:flex; flex-direction:column; align-items:center; background:#f0f8ff;}
-#map { position: relative; width:80vw; height:60vh; background:#e0f7fa; margin-top:20px; }
-.base { width:40px; height:40px; border-radius:50%; position:absolute; text-align:center; line-height:40px; color:#fff; font-weight:bold; }
-.official { background:#ff5722; }
-.user { background:#4caf50; }
-#infoPanel { width:80vw; display:flex; justify-content:space-around; margin-top:10px; }
-.infoBox { width:20%; padding:5px; background:#fff; border:1px solid #ccc; border-radius:5px; text-align:center; }
-#announcements { height:40px; overflow:hidden; position:relative; background:#001f2f; border:3px solid #0ff; border-radius:8px; box-shadow:0 0 10px #0ff; width:80vw; margin-top:10px; }
-#marqueeSpan { position:absolute; white-space:nowrap; color:#0ff; text-shadow:0 0 2px #0ff,0 0 5px #0ff,0 0 10px #0ff; font-weight:bold; font-size:18px; }
+body {
+  font-family: 'Orbitron', sans-serif;
+  margin: 0;
+  background: radial-gradient(circle at center, #0b0f17 40%, #03050a 100%);
+  color: #ccc;
+  overflow: hidden;
+}
+#header {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  z-index: 100;
+}
+#header button {
+  background: #222;
+  color: #0ff;
+  border: 1px solid #0ff;
+  padding: 6px 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+#header button:hover {
+  background: #0ff;
+  color: #000;
+}
+
+#map {
+  position: relative;
+  width: 100%;
+  height: 85vh;
+}
+.base {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  position: absolute;
+  text-align: center;
+  line-height: 50px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 0 10px rgba(255,255,255,0.3);
+  transition: transform 0.3s ease;
+}
+.base:hover {
+  transform: scale(1.2);
+}
+.official {
+  background: #ff5722;
+  box-shadow: 0 0 15px #ff5722;
+}
+.user {
+  background: #2196f3;
+  box-shadow: 0 0 10px #2196f3;
+}
+
+#announcements {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  background: rgba(10, 10, 20, 0.85);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  color: #ccc;
+  font-size: 14px;
+  border-top: 1px solid #333;
+}
+#scroll-text {
+  position: relative;
+  white-space: nowrap;
+  animation: scrollText 20s linear infinite;
+  padding-left: 100%;
+  filter: brightness(0.7);
+}
+@keyframes scrollText {
+  0% { transform: translateX(100%); }
+  45% { transform: translateX(0); }
+  55% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* 拠点情報ポップアップ */
+#infoBox {
+  position: absolute;
+  background: rgba(20,20,30,0.95);
+  color: #0ff;
+  padding: 12px;
+  border: 1px solid #0ff;
+  border-radius: 8px;
+  display: none;
+  z-index: 50;
+  font-size: 13px;
+  min-width: 180px;
+}
 </style>
 </head>
 <body>
 
-<div id="map"></div>
+<div id="header">
+  <button onclick="window.location.href='index.html'">🏠 メインへ戻る</button>
+</div>
 
-<div id="infoPanel"></div>
+<div id="map"></div>
+<div id="infoBox"></div>
 
 <div id="announcements">
-  <div id="marqueeSpan"></div>
+  <div id="scroll-text">戦況アナウンス起動中…</div>
 </div>
 
 <script>
-// --- 拠点データ ---
-const bases = [
-  { id:'official1', x:200, y:100, type:'official', name:'学園本部', hp:100, enemy:0, res:50 },
-  { id:'user1', x:350, y:150, type:'user', name:'カフェ', hp:45, enemy:3, res:20 },
-  { id:'user2', x:200, y:250, type:'user', name:'研究室', hp:15, enemy:8, res:10 }
-];
+const map = document.getElementById("map");
+const infoBox = document.getElementById("infoBox");
 
-// --- マップに円陣配置 ---
-const map = document.getElementById('map');
-bases.forEach((b,i)=>{
-  const div = document.createElement('div');
-  div.className = 'base '+b.type;
-  div.style.left = b.x+'px';
-  div.style.top = b.y+'px';
-  div.textContent = i+1; //番号表示
+// === 拠点生成 ===
+const centerX = window.innerWidth / 2;
+const centerY = window.innerHeight / 2 + 100;
+const radius = 250;
+
+const bases = [];
+bases.push({id: "official", x: centerX, y: centerY, name: "学園本部", type: "official", hp: 100});
+
+for (let i = 1; i <= 19; i++) {
+  const angle = (i / 19) * 2 * Math.PI;
+  const offsetX = (Math.cos(angle) * radius) + centerX + (Math.random() * 40 - 20);
+  const offsetY = (Math.sin(angle) * radius) + centerY + (Math.random() * 40 - 20);
+  bases.push({id: `user${i}`, x: offsetX, y: offsetY, name: `拠点${i}`, type: "user", hp: Math.floor(Math.random() * 100)});
+}
+
+// === 表示 ===
+bases.forEach(b => {
+  const div = document.createElement("div");
+  div.className = "base " + b.type;
+  div.style.left = b.x + "px";
+  div.style.top = b.y + "px";
+  div.textContent = b.name === "学園本部" ? "本部" : b.name.replace("拠点", "");
+  
+  div.addEventListener("click", e => {
+    showInfo(b, e.pageX, e.pageY);
+  });
+  
   map.appendChild(div);
 });
 
-// --- 右側情報パネル ---
-const infoPanel = document.getElementById('infoPanel');
-function updateInfoPanel(){
-  infoPanel.innerHTML = '';
-  bases.forEach(b=>{
-    const box = document.createElement('div');
-    box.className = 'infoBox';
-    box.innerHTML = `
-      <strong>${b.name}</strong><br>
-      HP: ${b.hp}%<br>
-      敵: ${b.enemy}<br>
-      資源: ${b.res}
-    `;
-    infoPanel.appendChild(box);
-  });
+// === 拠点クリックで情報表示 ===
+function showInfo(b, x, y) {
+  infoBox.style.left = x + "px";
+  infoBox.style.top = y + "px";
+  infoBox.innerHTML = `
+    <strong>${b.name}</strong><br>
+    耐久値: ${b.hp}%<br>
+    状態: ${b.hp <= 0 ? "陥落" : b.hp < 30 ? "危険" : b.hp < 100 ? "交戦中" : "安定"}<br>
+    <hr>
+    <button onclick="alert('戦闘画面（仮）を開きます')">⚔️ 戦闘へ</button>
+  `;
+  infoBox.style.display = "block";
 }
 
-// 初回表示
-updateInfoPanel();
+// === 戦況アナウンス ===
+const scrollText = document.getElementById("scroll-text");
+function updateAnnouncements() {
+  const critical = bases.filter(b => b.hp < 30 && b.hp > 0);
+  const stable = bases.filter(b => b.hp >= 30 && b.hp < 100);
+  const safe = bases.filter(b => b.hp === 100);
 
-// --- アナウンス文章判定 ---
-function getAnnouncementText(b){
-  if(b.enemy === 0) return `${b.name}：防衛完了！`;
-  if(b.hp >= 80) return `${b.name} HP${b.hp}%：安定しています。`;
-  else if(b.hp >= 50) return `${b.name} HP${b.hp}%：注意が必要です。`;
-  else if(b.hp >= 20) return `${b.name} HP${b.hp}%：支援を要請しています！`;
-  else return `${b.name} HP${b.hp}%：危険！すぐに救援を！`;
-}
-
-// 色判定
-function getAnnouncementColor(b){
-  if(b.enemy === 0) return 'lime';
-  if(b.hp < 30) return 'red';
-  if(b.enemy > 7) return 'orange';
-  return '#0ff';
-}
-
-// --- 横スクロール電子アナウンス ---
-const marqueeSpan = document.getElementById('marqueeSpan');
-let currentIndex = 0;
-
-function showMarquee(){
-  let b = bases[currentIndex];
-  const containerWidth = document.getElementById('announcements').offsetWidth;
-  let stopX = containerWidth/2 - marqueeSpan.offsetWidth/2;
-  let currentX = containerWidth;
-  let step = 2;
-  let stopped = false;
-
-  function animate(){
-    b = bases[currentIndex];
-    marqueeSpan.textContent = getAnnouncementText(b);
-    marqueeSpan.style.color = getAnnouncementColor(b);
-
-    if(!stopped && currentX > stopX){
-      currentX -= step;
-      marqueeSpan.style.left = currentX+'px';
-      requestAnimationFrame(animate);
-    } else if(!stopped){
-      stopped = true;
-      setTimeout(()=>{
-        stopped=false;
-        moveLeft();
-      },3000);
-    }
+  let text = "";
+  if (critical.length > 0) {
+    const c = critical[Math.floor(Math.random() * critical.length)];
+    text = `${c.name}：耐久${c.hp}%！救援を求めています！`;
+  } else if (stable.length > 0) {
+    const s = stable[Math.floor(Math.random() * stable.length)];
+    text = `${s.name}：戦闘継続中、被害軽微。`;
+  } else if (safe.length > 0) {
+    const s = safe[Math.floor(Math.random() * safe.length)];
+    text = `${s.name}：防衛完了、エリア安定化！`;
+  } else {
+    text = "全拠点のデータ更新中...";
   }
-
-  function moveLeft(){
-    if(currentX + marqueeSpan.offsetWidth > 0){
-      currentX -= step;
-      marqueeSpan.style.left = currentX+'px';
-      b = bases[currentIndex];
-      marqueeSpan.textContent = getAnnouncementText(b);
-      marqueeSpan.style.color = getAnnouncementColor(b);
-      requestAnimationFrame(moveLeft);
-    } else {
-      currentIndex = (currentIndex+1)%bases.length;
-      showMarquee();
-    }
-  }
-
-  marqueeSpan.style.left = containerWidth+'px';
-  animate();
+  scrollText.textContent = text;
 }
 
-// 初回表示
-showMarquee();
-
-// --- デモ用：HP・敵数変化シミュレーション ---
-setInterval(()=>{
-  bases.forEach(b=>{
-    if(b.hp>0) b.hp = Math.max(0,b.hp-Math.floor(Math.random()*5));
-    if(b.enemy>0) b.enemy = Math.max(0,b.enemy-Math.floor(Math.random()*2));
-  });
-  updateInfoPanel();
-},5000);
+// 初回＋1時間ごと更新
+updateAnnouncements();
+setInterval(updateAnnouncements, 3600000);
 </script>
-
 </body>
 </html>
