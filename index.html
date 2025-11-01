@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>防衛線マップ（円陣配置）</title>
+<title>防衛線マップ（番号付き・調整版）</title>
 <style>
 body {
   font-family: sans-serif;
@@ -29,6 +29,11 @@ body {
   line-height: 40px;
   color: #fff;
   font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.base:hover {
+  transform: scale(1.15);
 }
 .official { background: #ff5722; }
 .user { background: #4caf50; }
@@ -68,51 +73,69 @@ fetch("header.html")
 const map = document.getElementById("map");
 const announcements = document.getElementById("announcements");
 
-// 中心点
-const centerX = window.innerWidth / 2;
-const centerY = window.innerHeight * 0.35;
+// 拠点を配置する関数
+function setupBases() {
+  map.innerHTML = ""; // 再描画時に初期化
 
-// 学園本部（中央）
-const officialBase = { id: "official1", x: centerX - 20, y: centerY - 20, type: "official", name: "学園本部", faces: ["静海", "宝楽"] };
-createBase(officialBase);
+  const centerX = map.offsetWidth / 2;
+  const centerY = map.offsetHeight / 2;
+  const radius = Math.min(centerX, centerY) * 0.6; // 半径をやや小さくして円陣を縮める
 
-// ユーザー拠点（円形に配置）
-const numBases = 20;
-const radius = 250;
-for (let i = 0; i < numBases; i++) {
-  const angle = (i / numBases) * 2 * Math.PI;
-  const x = centerX + radius * Math.cos(angle) - 20;
-  const y = centerY + radius * Math.sin(angle) - 20;
-  const base = {
-    id: "user" + (i + 1),
-    x, y,
-    type: "user",
-    name: "拠点" + (i + 1),
-    faces: []
-  };
-  createBase(base);
+  // 学園本部（中央）
+  createBase({
+    id: "official1",
+    x: centerX - 20,
+    y: centerY - 20,
+    type: "official",
+    name: "学園本部",
+    faces: ["静海", "宝楽"]
+  });
+
+  // ユーザー拠点（円形に配置）
+  const numBases = 20;
+  for (let i = 0; i < numBases; i++) {
+    const angle = (i / numBases) * 2 * Math.PI;
+    const x = centerX + radius * Math.cos(angle) - 20;
+    const y = centerY + radius * Math.sin(angle) - 20;
+    const base = {
+      id: "user" + (i + 1),
+      x, y,
+      type: "user",
+      name: "拠点" + (i + 1),
+      faces: []
+    };
+    createBase(base);
+  }
 }
 
-// === 関数 ===
+// 拠点生成
 function createBase(b) {
   const div = document.createElement("div");
   div.className = "base " + b.type;
   div.style.left = b.x + "px";
   div.style.top = b.y + "px";
-  div.textContent = b.name[0];
+  div.textContent = b.name.replace("拠点", ""); // 数字部分だけ表示
+
+  // 顔アイコン
   b.faces.forEach(f => {
     const fdiv = document.createElement("span");
     fdiv.className = "face";
     fdiv.title = f;
     div.appendChild(fdiv);
   });
+
+  // クリックで防衛アクション画面へ（仮）
+  div.onclick = () => {
+    alert(b.name + " を開きます（後で防衛UIに）");
+  };
+
   map.appendChild(div);
 }
 
 // === アナウンス ===
 const logs = [
   "防衛線起動 — 各拠点、戦闘準備を開始！",
-  "北東拠点に敵影確認！",
+  "南西拠点（12番）に敵影確認！",
   "学園本部、防衛魔術展開完了！"
 ];
 logs.forEach(l => {
@@ -120,6 +143,10 @@ logs.forEach(l => {
   p.textContent = l;
   announcements.appendChild(p);
 });
+
+// 初期描画とリサイズ対応
+setupBases();
+window.addEventListener("resize", setupBases);
 </script>
 
 </body>
