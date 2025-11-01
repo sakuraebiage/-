@@ -2,46 +2,45 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>トップ画面</title>
+<title>トップページ</title>
 <style>
-body{font-family:monospace; background:#000; color:#e0e0e0;}
-.char-card{border:1px solid #8ae1ff; margin:10px; padding:10px; border-radius:8px;}
-.char-links button{margin:3px; padding:5px; background:#111; color:#8ae1ff; border:1px solid #8ae1ff; cursor:pointer;}
-.char-links button:hover{background:#8ae1ff;color:#000;}
+body { font-family:"Roboto","Consolas",monospace; background:#000; color:#fff; margin:0; }
+header { background:#111; padding:10px 20px; display:flex; gap:10px; }
+header a { color:#8ae1ff; text-decoration:none; }
+header a:hover { color:#fff; }
+.char-card { border:1px solid #8ae1ff; padding:10px; margin:10px; display:inline-block; width:200px; vertical-align:top; }
+.char-card img { width:120px; height:120px; display:block; margin:0 auto 5px; background:#222; }
+.logs { background:#111; padding:5px; max-height:100px; overflow-y:auto; margin-top:5px; }
 </style>
 </head>
 <body>
-<h2>トップ画面</h2>
+<header>
+  <a href="mypage.html">マイページ</a>
+  <a href="defense.html">防衛画面</a>
+  <a href="items.html">アイテム</a>
+  <a href="craft.html">クラフト</a>
+</header>
+
+<h1>登録済みキャラクター一覧</h1>
 <div id="charList"></div>
 
 <script>
-const params=new URLSearchParams(window.location.search);
-const selectedID=params.get("id");
+const charList = document.getElementById("charList");
+const chars = JSON.parse(localStorage.getItem("characters")||"[]");
 
-let chars=JSON.parse(localStorage.getItem("chars")||"[]");
-const container=document.getElementById("charList");
-
-// 表示するのは登録キャラだけ
-chars.forEach(c=>{
-  if(selectedID && c.id!==selectedID) return;
-  const div=document.createElement("div");
+chars.forEach((c,i)=>{
+  const div = document.createElement("div");
   div.className="char-card";
   div.innerHTML=`
-    <strong>${c.name}</strong> (ID: ${c.id})<br>
-    直近行動: ${c.lastAction||"なし"}<br>
-    直近発言: ${c.lastMessage||"なし"}<br>
-    <div class="char-links">
-      <button onclick="goDefense('${c.id}')">防衛画面</button>
-      <button onclick="goExplore('${c.id}')">探索画面</button>
-      <button onclick="goMyPage('${c.id}')">マイページ</button>
+    <img src="${c.icon||''}" alt="アイコン">
+    <strong>${c.name}</strong><br>
+    <em>ID: ${c.id}</em>
+    <div class="logs">
+      ${c.logs.slice(-5).map(l=>`<div>${l}</div>`).join('')}
     </div>
   `;
-  container.appendChild(div);
+  charList.appendChild(div);
 });
-
-function goDefense(id){ window.location.href="defense.html?id="+encodeURIComponent(id); }
-function goExplore(id){ window.location.href="explore.html?id="+encodeURIComponent(id); }
-function goMyPage(id){ window.location.href="mypage.html?id="+encodeURIComponent(id); }
 </script>
 </body>
 </html>
