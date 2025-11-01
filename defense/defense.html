@@ -1,31 +1,111 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>防衛戦画面</title>
-  <link rel="stylesheet" href="defense.css">
+<meta charset="UTF-8">
+<title>防衛戦マップ</title>
+<style>
+body { margin:0; font-family:sans-serif; display:flex; flex-direction:column; height:100vh; background:#111; color:#fff;}
+header { padding:10px; background:#222; display:flex; justify-content:space-between; align-items:center;}
+#map-wrapper { flex:1; overflow:auto; background: radial-gradient(circle at 50% 60%, #1a1a1a 0%, #000 100%); }
+#map { position:relative; width:1000px; height:800px; }
+.base { width:40px; height:40px; border-radius:50%; position:absolute; text-align:center; line-height:40px; color:#fff; font-weight:bold; cursor:pointer; }
+.official { background:#ff5722; }
+.user { background:#4caf50; }
+#announcements { height:60px; overflow:hidden; background:#222; padding:5px; border-bottom:1px solid #444; }
+.hp-bar, .resource-bar, .enemy-bar { width:60px; height:6px; background:#555; margin:2px 0; border-radius:3px; overflow:hidden; }
+.hp-fill, .resource-fill, .enemy-fill { height:100%; }
+.status-panel { position:absolute; right:10px; top:10px; width:180px; background:rgba(0,0,0,0.5); padding:5px; font-size:12px; }
+</style>
 </head>
 <body>
-  <header>
-    <h1>星守防衛線</h1>
-    <nav>
-      <a href="../index.html">ホーム</a>
-      <a href="defense.html">防衛戦</a>
-    </nav>
-  </header>
+<header>
+  <div>防衛戦マップ</div>
+  <div><a href="index.html" style="color:#0ff;">トップに戻る</a></div>
+</header>
+<div id="announcements"></div>
+<div id="map-wrapper">
+  <div id="map"></div>
+</div>
+<div class="status-panel" id="statusPanel"></div>
+<script>
+// ===== 拠点データ =====
+const bases = [];
+const centerX = 500, centerY = 400, radius = 300;
+for(let i=0;i<20;i++){
+  const angle = i * (2*Math.PI/20) + (Math.random()*0.2-0.1); //少し歪み
+  bases.push({
+    id: i+1,
+    name: `拠点${i+1}`,
+    type: i===0?'official':'user',
+    x: centerX + radius*Math.cos(angle),
+    y: centerY + radius*Math.sin(angle),
+    hp: 100,
+    resource: Math.floor(Math.random()*100),
+    enemies: Math.floor(Math.random()*200),
+    faces: []
+  });
+}
 
-  <main id="battlefield">
-    <div id="bases-container"></div>
-    <div id="status-panel">
-      <h2>防衛ステータス</h2>
-      <div id="base-status"></div>
-    </div>
-  </main>
+// ===== マップに描画 =====
+const map = document.getElementById('map');
+bases.forEach(b=>{
+  const div = document.createElement('div');
+  div.className='base '+b.type;
+  div.style.left=(b.x-20)+'px';
+  div.style.top=(b.y-20)+'px';
+  div.dataset.id=b.id;
+  div.dataset.hp=b.hp;
+  div.dataset.resource=b.resource;
+  div.dataset.enemies=b.enemies;
+  div.innerHTML=b.id;
+  div.onclick = ()=>alert(`拠点${b.id}選択: 支援/救助/戦闘`);
+  map.appendChild(div);
+});
 
-  <div id="announce-container">
-    <div id="announce-text">防衛情報を更新中...</div>
-  </div>
+// ===== ステータスパネル更新 =====
+const statusPanel = document.getElementById('statusPanel');
+function updateStatus(){
+  statusPanel.innerHTML = '';
+  bases.forEach(b=>{
+    const entry = document.createElement('div');
+    entry.innerHTML = `
+      <strong>${b.name}</strong><br>
+      💚HP: <div class="hp-bar"><div class="hp-fill" style="width:${b.hp}%;background:${b.hp>60?'#0f0':b.hp>30?'#ff0':'#f00'}"></div></div>
+      🪨資源: <div class="resource-bar"><div class="resource-fill" style="width:${Math.min(b.resource/50*100,100)}%;background:#0ff"></div></div>
+      👾敵数: <div class="enemy-bar"><div class="enemy-fill" style="width:${Math.min(b.enemies/10,100)}%;background:#ff6600"></div></div>
+    `;
+    statusPanel.appendChild(entry);
+  });
+}
 
-  <script src="defense.js"></script>
+// ===== アナウンス =====
+const annDiv = document.getElementById('announcements');
+function updateAnnouncements(){
+  annDiv.innerHTML = '';
+  bases.forEach(b=>{
+    let msg='';
+    if(b.enemies===0) msg=`${b.name} 防衛完了！`;
+    else if(b.hp<30) msg=`${b.name} HP低下！支援を求めています`;
+    else if(b.hp<60) msg=`${b.name} HP50%以下`;
+    else msg=`${b.name} 正常`;
+    const p = document.createElement('p'); p.textContent=msg;
+    annDiv.appendChild(p);
+  });
+}
+
+// ===== 敵数やHPをランダム更新 =====
+function simulate(){
+  bases.forEach(b=>{
+    b.enemies=Math.max(0, Math.min(1000, b.enemies + (Math.random()*10-5))).toFixed(0);
+    b.hp=Math.max(0, Math.min(100, b.hp + (Math.random()*2-1))).toFixed(0);
+    b.resource=Math.max(0, Math.min(100, b.resource + (Math.random()*3-1))).toFixed(0);
+  });
+  updateStatus();
+  updateAnnouncements();
+}
+simulate();
+setInterval(simulate,3600*1000); // 1時間ごと更新
+
+</script>
 </body>
 </html>
