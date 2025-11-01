@@ -134,7 +134,7 @@ for(let i=0;i<numBases;i++){
 // 円陣配置
 function positionBases(){
   const centerX=map.offsetWidth/2;
-  const centerY=map.offsetHeight/2 + 100;
+  const centerY=map.offsetHeight/2 + 170;
   bases.forEach((base,i)=>{
     if(i===0){ base.style.left=`${centerX-27.5}px`; base.style.top=`${centerY-27.5}px`; return; }
     const angle=(i/19)*2*Math.PI;
@@ -193,8 +193,8 @@ function scrollAnnouncement(){
 
   const b=aliveBases[annIndex%aliveBases.length];
 
-  if(b.dataset.enemies==0){ announcementText.style.color="#00ff7f"; announcementText.textContent=`${b.dataset.id} 防衛完了！`; }
-  else if(b.dataset.hp>50){ announcementText.style.color="#7fe8ff"; announcementText.textContent=`${b.dataset.id} 防衛中、安定しています`; }
+  if(b.dataset.enemies==0){ announcementText.style.color="#00ff7f"; announcementText.textContent=`${b.dataset.id} 敵の撤退を確認、防衛完了！`; }
+  else if(b.dataset.hp>50){ announcementText.style.color="#7fe8ff"; announcementText.textContent=`${b.dataset.id} 防衛中、戦線安定しています`; }
   else{ announcementText.style.color="#ff4b4b"; announcementText.textContent=`${b.dataset.id} 緊急！救援要請！`; }
 
   announcementText.style.transition="none";
