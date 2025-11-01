@@ -1,59 +1,33 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>マイページ</title>
-<style>
-body { font-family:"Roboto","Consolas",monospace; background:#000; color:#fff; padding:20px; }
-label { display:block; margin:8px 0; }
-input, textarea, button { margin:5px 0; padding:5px; width:300px; }
-textarea { height:60px; }
-button { cursor:pointer; background:#111; border:1px solid #8ae1ff; color:#8ae1ff; }
-button:hover { background:#8ae1ff; color:#000; }
-</style>
-</head>
-<body>
-<h1>マイページ</h1>
-
-<div id="charForms"></div>
+<h2>マイページ</h2>
+<label>名前: <input type="text" id="nameInput"></label><br>
+<label>プロフィール: <input type="text" id="profileInput"></label><br>
+<div id="iconInputs"></div>
+<button id="addIconBtn">アイコン追加</button>
 <button id="saveBtn">保存</button>
-<button onclick="window.location.href='index.html'">トップへ戻る</button>
 
 <script>
-let chars = JSON.parse(localStorage.getItem("characters") || "[]");
+const currentCharName = localStorage.getItem("currentChar");
+const allChars = JSON.parse(localStorage.getItem("characters")||"[]");
+const currentChar = allChars.find(c=>c.name===currentCharName);
 
-// デフォルト10キャラ枠
-while(chars.length < 10) {
-  chars.push({name:'', profile:'', tagline:'', icon:'', sprite:''});
+const iconInputsDiv = document.getElementById("iconInputs");
+
+function renderIconInputs(){
+  iconInputsDiv.innerHTML="";
+  for(let i=0;i<10;i++){
+    const val = currentChar.iconUrls[i]||"";
+    iconInputsDiv.innerHTML += `<input type="text" placeholder="アイコンURL" value="${val}"><br>`;
+  }
 }
+renderIconInputs();
 
-const container = document.getElementById("charForms");
-
-chars.forEach((c,i)=>{
-  const div = document.createElement("div");
-  div.innerHTML = `
-    <h3>キャラ ${i+1}</h3>
-    <label>名前: <input type="text" class="name" value="${c.name}"></label>
-    <label>プロフィール: <textarea class="profile">${c.profile}</textarea></label>
-    <label>一言: <input type="text" class="tagline" value="${c.tagline}"></label>
-    <label>アイコンURL: <input type="text" class="icon" value="${c.icon}"></label>
-    <label>立ち絵URL: <input type="text" class="sprite" value="${c.sprite}"></label>
-    <hr>
-  `;
-  container.appendChild(div);
-});
-
-document.getElementById("saveBtn").addEventListener("click", ()=>{
-  document.querySelectorAll('#charForms div').forEach((div,i)=>{
-    chars[i].name = div.querySelector('.name').value;
-    chars[i].profile = div.querySelector('.profile').value;
-    chars[i].tagline = div.querySelector('.tagline').value;
-    chars[i].icon = div.querySelector('.icon').value;
-    chars[i].sprite = div.querySelector('.sprite').value;
-  });
-  localStorage.setItem("characters", JSON.stringify(chars));
-  alert("保存しました！");
-});
+document.getElementById("saveBtn").onclick=()=>{
+  currentChar.name = document.getElementById("nameInput").value;
+  currentChar.profile = document.getElementById("profileInput").value;
+  currentChar.iconUrls=[];
+  const inputs = iconInputsDiv.querySelectorAll("input");
+  inputs.forEach(inp=>{ if(inp.value) currentChar.iconUrls.push(inp.value); });
+  localStorage.setItem("characters",JSON.stringify(allChars));
+  alert("保存しました");
+};
 </script>
-</body>
-</html>
