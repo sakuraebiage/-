@@ -1,1 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>キャラクター登録</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<h1>キャラクター登録</h1>
+</header>
+
+<div style="padding:20px;">
+  <form id="regForm">
+    <label>ID:</label><br><input type="text" id="charID" required><br>
+    <label>4桁パスワード:</label><br><input type="password" id="charPW" maxlength="4" required><br>
+    <label>合言葉:</label><br><input type="text" id="charHint" required><br>
+    <label>キャラクター名:</label><br><input type="text" id="charName" required><br>
+    <label>アイコン (120x120推奨):</label><br><input type="file" id="charIcon" accept="image/*"><br>
+    <label>立ち絵 (700x800推奨):</label><br><input type="file" id="charStanding" accept="image/*"><br>
+    <button type="submit">登録</button>
+  </form>
+</div>
+
+<script src="script.js"></script>
+<script>
+const regForm=document.getElementById("regForm");
+
+regForm.addEventListener("submit",(e)=>{
+  e.preventDefault();
+  const char={ 
+    id: document.getElementById("charID").value,
+    password: document.getElementById("charPW").value,
+    hint: document.getElementById("charHint").value,
+    name: document.getElementById("charName").value,
+    icon: "", standing: ""
+  };
+
+  // アイコンと立ち絵はFileReaderでbase64化
+  const iconFile=document.getElementById("charIcon").files[0];
+  const standingFile=document.getElementById("charStanding").files[0];
+
+  function finishAdd(){
+    addCharacter(char);
+    alert("登録完了！");
+    window.location.href="index.html";
+  }
+
+  if(iconFile){
+    const reader=new FileReader();
+    reader.onload=(e)=>{ char.icon=e.target.result; 
+      if(standingFile){ readStanding(); } else { finishAdd(); } };
+    reader.readAsDataURL(iconFile);
+  } else { if(standingFile){ readStanding(); } else { finishAdd(); } }
+
+  function readStanding(){
+    const reader=new FileReader();
+    reader.onload=(e)=>{ char.standing=e.target.result; finishAdd(); };
+    reader.readAsDataURL(standingFile);
+  }
+});
+</script>
+</body>
+</html>
 
