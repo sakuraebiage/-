@@ -4,47 +4,45 @@
 <meta charset="UTF-8">
 <title>トップページ</title>
 <style>
-body { margin:0; font-family:"Roboto","Consolas",monospace; background:#000; color:#fff; }
-header { display:flex; background:#111; padding:10px; gap:15px; }
-header a { color:#8ae1ff; text-decoration:none; }
-header a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
-.char-card { border:1px solid #8ae1ff; margin:10px; padding:10px; display:flex; gap:10px; align-items:center; }
-.char-card img.icon { width:60px; height:60px; object-fit:cover; }
-.char-card img.sprite { width:120px; height:137px; object-fit:cover; }
-.char-info { display:flex; flex-direction:column; }
+body{margin:0;font-family:sans-serif;background:#000;color:#e0e0e0;}
+header{background:#111;padding:10px;}
+header a{color:#8ae1ff;margin:0 10px;text-decoration:none;}
+section{padding:10px;}
+img{width:200px;height:auto;}
 </style>
 </head>
 <body>
 <header>
-  <a href="index.html">🏠 トップ</a>
-  <a href="defense.html">🛡 防衛</a>
+  <a href="defense.html">🛡 防衛画面</a>
+  <a href="mypage.html">👤 マイページ</a>
   <a href="items.html">🎒 アイテム</a>
   <a href="craft.html">⚒ クラフト</a>
-  <a href="mypage.html">👤 マイページ</a>
 </header>
 
-<h2>キャラクター一覧</h2>
-<div id="charList"></div>
+<section id="profileSection"></section>
 
 <script>
-let chars = JSON.parse(localStorage.getItem("characters") || "[]");
-const charList = document.getElementById("charList");
+// プロフィール
+const currentCharName = localStorage.getItem("currentChar");
+const allChars = JSON.parse(localStorage.getItem("characters")||"[]");
+const currentChar = allChars.find(c=>c.name===currentCharName);
 
-chars.forEach(c => {
-  const card = document.createElement("div");
-  card.className = "char-card";
-  card.innerHTML = `
-    <img class="icon" src="${c.icon||''}" alt="icon">
-    <img class="sprite" src="${c.sprite||''}" alt="sprite">
-    <div class="char-info">
-      <strong>${c.name||'未設定'}</strong>
-      <em>${c.tagline||''}</em>
-      <p>${c.profile||''}</p>
-      <small>直近の行動: ${c.lastAction||'なし'} / 発言: ${c.lastSpeech||'なし'}</small>
-    </div>
+const sec = document.getElementById("profileSection");
+if(currentChar){
+  sec.innerHTML = `<h2>${currentChar.name}</h2>
+    <p>${currentChar.profile||"一言設定なし"}</p>
+    ${currentChar.standUrls.length>0?`<img src="${currentChar.standUrls[0]}" alt="立ち絵">`:"立ち絵未設定"}
+    <h3>直近の行動</h3>
+    <ul id="actionsList"></ul>
   `;
-  charList.appendChild(card);
-});
+
+  const actionsList = document.getElementById("actionsList");
+  currentChar.recentActions.slice(-5).forEach(a=>{
+    const li=document.createElement("li"); li.textContent=a; actionsList.appendChild(li);
+  });
+}else{
+  sec.innerHTML="<p>ログインキャラが見つかりません。登録してください。</p>";
+}
 </script>
 </body>
 </html>
