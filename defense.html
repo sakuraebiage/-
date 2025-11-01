@@ -85,10 +85,11 @@
     const baseCount = 20;
     const radius = 250;
     const centerX = battlefield.clientWidth / 2;
-    const centerY = battlefield.clientHeight / 1.4; // 少し下寄り
+    const centerY = battlefield.clientHeight / 1.4;
 
     const bases = [];
 
+    // --- 拠点生成 ---
     for (let i = 0; i < baseCount; i++) {
       const angle = (i / baseCount) * 2 * Math.PI;
       const x = centerX + radius * Math.cos(angle);
@@ -102,7 +103,7 @@
       base.dataset.hp = 100;
 
       base.addEventListener('click', () => {
-        // HP減少シミュレーション
+        // HP減少
         let hp = Math.max(0, base.dataset.hp - Math.floor(Math.random() * 30 + 10));
         base.dataset.hp = hp;
 
@@ -126,8 +127,50 @@
       battlefield.appendChild(base);
     }
 
+    // --- 自動戦況アナウンス更新（1時間ごと） ---
+    function updateGlobalAnnouncement() {
+      const totalHP = bases.reduce((sum, b) => sum + parseInt(b.dataset.hp), 0);
+      const avgHP = totalHP / baseCount;
+      let message;
+
+      if (avgHP > 75) {
+        const msgs = [
+          "全拠点に異常なし。防衛は安定しています。",
+          "前線は静穏。警戒を続けてください。",
+          "防衛線に揺らぎなし。士気高く保たれています。"
+        ];
+        message = msgs[Math.floor(Math.random() * msgs.length)];
+      } else if (avgHP > 50) {
+        const msgs = [
+          "数拠点で軽微な損傷。応急対応を実施中。",
+          "小規模な揺らぎを検知。追加補給を推奨します。",
+          "防衛網に軽度の乱れあり、再編成を検討中。"
+        ];
+        message = msgs[Math.floor(Math.random() * msgs.length)];
+      } else if (avgHP > 25) {
+        const msgs = [
+          "被害拡大中、前線の再強化を急いでください。",
+          "複数拠点が危険域。救援部隊を要請中！",
+          "前線が不安定。戦況は厳しい状況です。"
+        ];
+        message = msgs[Math.floor(Math.random() * msgs.length)];
+      } else {
+        const msgs = [
+          "防衛線崩壊寸前……生存者の確保を最優先に。",
+          "残存勢力わずか。全員退避を検討してください。",
+          "最後の砦が耐えています……希望を捨てるな。"
+        ];
+        message = msgs[Math.floor(Math.random() * msgs.length)];
+      }
+
+      announcement.textContent = `[自動報告] ${message}`;
+    }
+
+    // 初期メッセージ
     announcement.textContent = '防衛エリア展開完了。各拠点へのアクセスが可能です。';
+
+    // 1時間ごとに自動更新（3600000ms）
+    setInterval(updateGlobalAnnouncement, 3600000);
   </script>
 </body>
 </html>
-
