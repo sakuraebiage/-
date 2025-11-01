@@ -14,8 +14,10 @@ a { margin-left: 10px; }
 .official { background: #ff5722; }
 .user { background: #4caf50; }
 .face { width: 20px; height: 20px; border-radius: 50%; display: inline-block; background: #ffeb3b; margin-right: 2px; vertical-align: middle; }
-#announcements { height: 20vh; background: #fafafa; overflow-y: auto; padding: 10px; border-top: 1px solid #ccc; }
+#announcements { height: 30px; background: #fafafa; overflow: hidden; white-space: nowrap; border-top: 1px solid #ccc; position: relative; }
 .progressBar { width: 100%; }
+.marquee { display: inline-block; padding-left: 100%; animation: scrollLeft 20s linear infinite; }
+@keyframes scrollLeft { 0% { transform: translateX(0%); } 100% { transform: translateX(-100%); } }
 </style>
 </head>
 <body>
@@ -30,12 +32,12 @@ a { margin-left: 10px; }
   </div>
 </div>
 
-<div id="announcements"></div>
+<div id="announcements"><div class="marquee" id="marqueeContent"></div></div>
 
 <script>
 const map = document.getElementById('map');
 const baseStatusDiv = document.getElementById('baseStatus');
-const announcements = document.getElementById('announcements');
+const marqueeContent = document.getElementById('marqueeContent');
 
 // 円陣拠点データ
 const centerX = 400, centerY = 300, radius = 150;
@@ -82,21 +84,26 @@ function renderStatus(){
   });
 }
 
-// 戦況アナウンス描画（危険拠点は赤文字）
+// 戦況アナウンス（横スクロール）
 function updateLogs(){
-  announcements.innerHTML='';
+  let logText = '';
   bases.forEach(b=>{
-    const p = document.createElement('p');
     if(b.hp<30){
-      p.style.color='red';
-      p.textContent = `${b.name}が危険！HP:${b.hp}% 残敵:${b.enemy}`;
+      logText += `%c${b.name}が危険！HP:${b.hp}% 残敵:${b.enemy}    `;
     } else if(b.enemy>7){
-      p.style.color='orange';
-      p.textContent = `${b.name}に敵接近！残敵:${b.enemy}`;
+      logText += `%c${b.name}に敵接近！残敵:${b.enemy}    `;
     } else {
-      p.textContent = `${b.name}は安定。HP:${b.hp}% 残敵:${b.enemy}`;
+      logText += `%c${b.name}は安定。HP:${b.hp}% 残敵:${b.enemy}    `;
     }
-    announcements.appendChild(p);
+  });
+  marqueeContent.innerHTML='';
+  bases.forEach(b=>{
+    const span = document.createElement('span');
+    if(b.hp<30) span.style.color='red';
+    else if(b.enemy>7) span.style.color='orange';
+    else span.style.color='black';
+    span.textContent = `${b.name}:HP${b.hp}% R:${b.resource} E:${b.enemy}  `;
+    marqueeContent.appendChild(span);
   });
 }
 
