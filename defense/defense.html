@@ -1,248 +1,206 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>防衛戦況 - 拠点モニタリング</title>
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    body {
-      margin: 0;
-      font-family: "Consolas", "Roboto Mono", monospace;
-      background: radial-gradient(circle at 50% 60%, #1a1a1a 0%, #000 100%);
-      color: #e0e0e0;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+<meta charset="UTF-8">
+<title>防衛戦況 - 拠点モニタリング</title>
+<style>
+body {
+  margin:0;
+  font-family: "Consolas", "Roboto Mono", monospace;
+  background: radial-gradient(circle at 50% 60%, #1a1a1a 0%, #000 100%);
+  color:#e0e0e0;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 20px;
+  background: rgba(30,30,30,0.85);
+  border-bottom:1px solid #444;
+}
+header h1 { font-size:1.2em; color:#8ae1ff; }
+nav a {
+  color:#8ae1ff;
+  margin-left:12px;
+  text-decoration:none;
+}
+nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      background: rgba(30, 30, 30, 0.85);
-      border-bottom: 1px solid #444;
-    }
+#announcement {
+  width:100%;
+  text-align:center;
+  font-size:1em;
+  color:#7fe8ff;
+  white-space:nowrap;
+  overflow:hidden;
+  height:2em;
+  margin-top:5px;
+}
+.scroll-text { display:inline-block; }
 
-    header h1 {
-      font-size: 1.2em;
-      color: #8ae1ff;
-    }
+#main-container { display:flex; flex:1; overflow:hidden; }
+#map {
+  position:relative;
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+#status-panel {
+  width:280px;
+  background:rgba(30,30,30,0.8);
+  border-left:1px solid #555;
+  padding:10px;
+  overflow-y:auto;
+}
 
-    nav a {
-      color: #8ae1ff;
-      margin-left: 12px;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-
-    nav a:hover {
-      color: #fff;
-      text-shadow: 0 0 5px #00eaff;
-    }
-
-    #announcement {
-      width: 100%;
-      text-align: center;
-      font-size: 1em;
-      color: #7fe8ff;
-      white-space: nowrap;
-      overflow: hidden;
-      height: 2em;
-      margin-top: 5px;
-    }
-
-    .scroll-text {
-      display: inline-block;
-      animation: scroll-left 20s linear infinite;
-    }
-
-    @keyframes scroll-left {
-      0% { transform: translateX(100%); }
-      50% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
-    }
-
-    #main-container {
-      display: flex;
-      flex: 1;
-    }
-
-    #map {
-      position: relative;
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #status-panel {
-      width: 280px;
-      background: rgba(30, 30, 30, 0.8);
-      border-left: 1px solid #555;
-      padding: 10px;
-      overflow-y: auto;
-    }
-
-    .status-entry {
-      border-bottom: 1px solid #333;
-      padding: 6px 0;
-      font-size: 0.85em;
-    }
-
-    .base {
-      position: absolute;
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      background: rgba(90, 200, 255, 0.2);
-      border: 2px solid #8ae1ff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.8em;
-      color: #8ae1ff;
-      transition: all 0.5s ease;
-    }
-
-    .hp-bar {
-      width: 40px;
-      height: 4px;
-      background: #222;
-      border: 1px solid #444;
-      position: absolute;
-      bottom: -8px;
-      left: 7px;
-      border-radius: 2px;
-    }
-
-    .hp-fill {
-      height: 100%;
-      background: #00ff9d;
-      border-radius: 2px;
-    }
-  </style>
+.base {
+  position:absolute;
+  width:50px; height:50px;
+  border-radius:50%;
+  background:rgba(90,200,255,0.2);
+  border:2px solid #8ae1ff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:0.8em;
+  color:#8ae1ff;
+  transition: all 0.5s ease;
+}
+.hp-bar {
+  width:40px; height:4px;
+  background:#222;
+  border:1px solid #444;
+  position:absolute;
+  bottom:-8px;
+  left:5px;
+  border-radius:2px;
+}
+.hp-fill { height:100%; background:#00ff9d; border-radius:2px; }
+</style>
 </head>
-
 <body>
-  <header>
-    <h1>防衛戦況モニタ</h1>
-    <nav>
-      <a href="../index.html">🏠 ホーム</a>
-      <a href="../craft.html">⚒️ クラフト</a>
-      <a href="../items.html">🎒 アイテム</a>
-    </nav>
-  </header>
 
-  <div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
+<header>
+<h1>防衛戦況モニタ</h1>
+<nav>
+  <a href="../index.html">🏠 ホーム</a>
+  <a href="../craft.html">⚒️ クラフト</a>
+  <a href="../items.html">🎒 アイテム</a>
+</nav>
+</header>
 
-  <div id="main-container">
-    <div id="map"></div>
-    <div id="status-panel"></div>
-  </div>
+<div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
 
-  <script>
-    const map = document.getElementById("map");
-    const statusPanel = document.getElementById("status-panel");
-    const announcementText = document.getElementById("announcementText");
+<div id="main-container">
+  <div id="map"></div>
+  <div id="status-panel"></div>
+</div>
 
-    const bases = [];
-    const numBases = 20;
-    const radius = 250;
+<script>
+const map = document.getElementById("map");
+const statusPanel = document.getElementById("status-panel");
+const announcementText = document.getElementById("announcementText");
 
-    // === 初期生成 ===
-    for (let i = 0; i < numBases; i++) {
-      const base = document.createElement("div");
-      base.classList.add("base");
-      base.dataset.id = i === 0 ? "本部" : `拠点${i}`;
-      base.dataset.hp = 100;
-      base.dataset.resource = (Math.random() * 4000 + 1000).toFixed(0); // 資源
-      base.dataset.enemies = Math.floor(Math.random() * 300); // 敵数
-      base.textContent = base.dataset.id;
+const bases = [];
+const numBases = 20;
+const radius = 220; // 中心から拠点までの半径
 
-      const hpBar = document.createElement("div");
-      hpBar.classList.add("hp-bar");
-      const hpFill = document.createElement("div");
-      hpFill.classList.add("hp-fill");
-      hpBar.appendChild(hpFill);
-      base.appendChild(hpBar);
-      map.appendChild(base);
-      bases.push(base);
+// 初期生成
+for(let i=0;i<numBases;i++){
+  const base = document.createElement("div");
+  base.classList.add("base");
+  base.dataset.id = i===0 ? "本部" : `拠点${i}`;
+  base.dataset.hp = 100;
+  base.dataset.resource = (Math.random()*4000+1000).toFixed(0);
+  base.dataset.enemies = Math.floor(Math.random()*300);
+  base.textContent = base.dataset.id;
+
+  const hpBar = document.createElement("div");
+  hpBar.classList.add("hp-bar");
+  const hpFill = document.createElement("div");
+  hpFill.classList.add("hp-fill");
+  hpBar.appendChild(hpFill);
+  base.appendChild(hpBar);
+
+  map.appendChild(base);
+  bases.push(base);
+}
+
+// 円陣配置（本部中心）
+function positionBases(){
+  const centerX = map.offsetWidth/2;
+  const centerY = map.offsetHeight/2 + 50;
+  bases.forEach((base,i)=>{
+    if(i===0){
+      base.style.left=`${centerX-25}px`;
+      base.style.top=`${centerY-25}px`;
+      return;
     }
+    const angle = (i-1)/(numBases-1) * 2 * Math.PI;
+    const distortX = Math.sin(angle*3)*15;
+    const distortY = Math.cos(angle*5)*15;
+    base.style.left=`${centerX + radius*Math.cos(angle)+distortX - 25}px`;
+    base.style.top=`${centerY + radius*Math.sin(angle)+distortY - 25}px`;
+  });
+}
+positionBases();
+window.addEventListener("resize",positionBases);
 
-    // === 拠点の配置 ===
-    function positionBases() {
-      const centerX = map.offsetWidth / 2;
-      const centerY = map.offsetHeight / 2 + 50;
-      bases.forEach((base, i) => {
-        if (i === 0) {
-          base.style.left = `${centerX - 25}px`;
-          base.style.top = `${centerY - 25}px`;
-          return;
-        }
-        const angle = (i / 19) * 2 * Math.PI;
-        const distortX = Math.sin(angle * 3) * 20;
-        const distortY = Math.cos(angle * 5) * 20;
-        base.style.left = `${centerX + radius * Math.cos(angle) + distortX}px`;
-        base.style.top = `${centerY + radius * Math.sin(angle) + distortY}px`;
-      });
-    }
+// ステータス更新
+function updateBases(){
+  bases.forEach(base=>{
+    if(base.dataset.id==="本部") return;
+    let hp = Math.max(0, base.dataset.hp - Math.random()*5);
+    base.dataset.hp = hp.toFixed(0);
+    base.dataset.enemies = Math.max(0, base.dataset.enemies - Math.random()*5).toFixed(0);
+    base.dataset.resource = (parseInt(base.dataset.resource) + Math.random()*30-15).toFixed(0);
 
-    positionBases();
-    window.addEventListener("resize", positionBases);
+    const hpFill = base.querySelector(".hp-fill");
+    hpFill.style.width = `${hp}%`;
+    if(hp>60) hpFill.style.background="#00ff9d";
+    else if(hp>30) hpFill.style.background="#ffeb3b";
+    else hpFill.style.background="#ff4b4b";
+  });
+  updateStatusPanel();
+}
 
-    // === 状態更新 ===
-    function updateBases() {
-      bases.forEach(base => {
-        if (base.dataset.id === "本部") return;
-        // HP低下
-        const hp = Math.max(0, base.dataset.hp - Math.random() * 5);
-        base.dataset.hp = hp.toFixed(0);
-        // 敵数は時間で減少、資源は変動
-        base.dataset.enemies = Math.max(0, base.dataset.enemies - Math.random() * 5).toFixed(0);
-        base.dataset.resource = (parseInt(base.dataset.resource) + Math.random() * 30 - 15).toFixed(0);
+// ステータスパネル更新
+function updateStatusPanel(){
+  statusPanel.innerHTML="<h3>拠点ステータス</h3>";
+  bases.forEach(base=>{
+    const entry = document.createElement("div");
+    entry.classList.add("status-entry");
+    entry.innerHTML=`
+      <strong>${base.dataset.id}</strong><br>
+      💚HP: ${base.dataset.hp}%　
+      🪨資源: ${base.dataset.resource}　
+      👾敵数: ${base.dataset.enemies}
+    `;
+    statusPanel.appendChild(entry);
+  });
+}
 
-        const hpFill = base.querySelector(".hp-fill");
-        hpFill.style.width = `${hp}%`;
-        if (hp > 60) hpFill.style.background = "#00ff9d";
-        else if (hp > 30) hpFill.style.background = "#ffeb3b";
-        else hpFill.style.background = "#ff4b4b";
-      });
-      updateStatusPanel();
-    }
+// アナウンス
+function updateAnnouncement(){
+  const critical = bases.filter(b=>b.dataset.hp<50 && b.dataset.id!=="本部");
+  if(critical.length===0){
+    announcementText.textContent="全拠点、防衛完了。戦線は安定しています。";
+  }else{
+    const b = critical[Math.floor(Math.random()*critical.length)];
+    announcementText.textContent=`${b.dataset.id}の防衛ラインが損耗中！救援を要請！`;
+  }
+}
 
-    // === ステータス一覧 ===
-    function updateStatusPanel() {
-      statusPanel.innerHTML = "<h3>拠点ステータス</h3>";
-      bases.forEach(base => {
-        const entry = document.createElement("div");
-        entry.classList.add("status-entry");
-        entry.innerHTML = `
-          <strong>${base.dataset.id}</strong><br>
-          💚HP: ${base.dataset.hp}%　
-          🪨資源: ${base.dataset.resource}　
-          👾敵数: ${base.dataset.enemies}
-        `;
-        statusPanel.appendChild(entry);
-      });
-    }
-
-    // === アナウンス ===
-    function updateAnnouncement() {
-      const critical = bases.filter(b => b.dataset.hp < 50 && b.dataset.id !== "本部");
-      if (critical.length === 0) {
-        announcementText.textContent = "全拠点、防衛完了。戦線は安定しています。";
-      } else {
-        const b = critical[Math.floor(Math.random() * critical.length)];
-        announcementText.textContent = `${b.dataset.id}の防衛ラインが損耗中！救援を要請！`;
-      }
-    }
-
-    // === 定期更新 ===
-    updateStatusPanel();
-    updateAnnouncement();
-    setInterval(updateBases, 5000);
-    setInterval(updateAnnouncement, 3600000);
-  </script>
+// 定期更新
+updateStatusPanel();
+updateAnnouncement();
+setInterval(updateBases,5000);
+setInterval(updateAnnouncement,3600000);
+</script>
 </body>
 </html>
