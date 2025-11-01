@@ -94,6 +94,8 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
   border:2px solid #8ae1ff;
   border-radius:8px;
   text-align:center;
+  max-height:80%;
+  overflow-y:auto;
 }
 .modal-content button {
   margin:5px;
@@ -115,6 +117,7 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
     <a href="../index.html">🏠 ホーム</a>
     <a href="../craft.html">⚒️ クラフト</a>
     <a href="../items.html">🎒 アイテム</a>
+    <a href="#" id="myStatsLink">📊 自分の戦績</a>
   </nav>
 </header>
 
@@ -129,10 +132,14 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 <div class="modal-bg" id="modalBg">
   <div class="modal-content" id="modalContent">
     <h3 id="modalTitle"></h3>
-    <button onclick="alert('戦闘へ移動')">⚔ 戦闘</button>
-    <button onclick="alert('探索へ移動')">🧭 探索</button>
-    <button onclick="alert('救助へ移動')">🩹 救助</button>
-    <button onclick="alert('戦績を見る')">📊 戦績</button>
+    <div id="modalBody"></div>
+    <div>
+      <button id="combatBtn">⚔ 戦闘</button>
+      <button id="exploreBtn">🧭 探索</button>
+      <button id="rescueBtn">🩹 救助</button>
+      <button id="viewStatsBtn">📊 戦績</button>
+    </div>
+    <button onclick="closeModal()">閉じる</button>
   </div>
 </div>
 
@@ -142,10 +149,26 @@ const statusPanel = document.getElementById("status-panel");
 const announcementText = document.getElementById("announcementText");
 const modalBg = document.getElementById("modalBg");
 const modalTitle = document.getElementById("modalTitle");
+const modalBody = document.getElementById("modalBody");
+const myStatsLink = document.getElementById("myStatsLink");
 
 const bases = [];
 const numBases = 20;
 const radius = 250;
+
+// ダミーの戦績データ
+function generateDummyStats(baseId){
+  const stats = [];
+  for(let i=0;i<5;i++){
+    stats.push({
+      name: `プレイヤー${i+1}`,
+      kills: Math.floor(Math.random()*50),
+      rescues: Math.floor(Math.random()*10),
+      explored: Math.floor(Math.random()*5)
+    });
+  }
+  return stats;
+}
 
 // 拠点生成
 for(let i=0;i<numBases;i++){
@@ -169,14 +192,26 @@ for(let i=0;i<numBases;i++){
   // クリックでモーダル表示
   base.addEventListener("click", ()=>{
     modalBg.style.display="flex";
-    modalTitle.textContent=base.dataset.id;
+    modalTitle.textContent = base.dataset.id;
+    modalBody.innerHTML = "";
   });
+
+  // ボタンアクション
+  document.getElementById("combatBtn").onclick = ()=>alert("戦闘へ移動");
+  document.getElementById("exploreBtn").onclick = ()=>alert("探索へ移動");
+  document.getElementById("rescueBtn").onclick = ()=>alert("救助へ移動");
+  document.getElementById("viewStatsBtn").onclick = ()=>{
+    modalBody.innerHTML = "<h4>拠点全員の戦績</h4>";
+    const stats = generateDummyStats(base.dataset.id);
+    stats.forEach(s=>{
+      modalBody.innerHTML += `名前: ${s.name}　⚔${s.kills}　🩹${s.rescues}　🧭${s.explored}<br>`;
+    });
+  };
 }
 
 // モーダル閉じる
-modalBg.addEventListener("click",(e)=>{
-  if(e.target===modalBg) modalBg.style.display="none";
-});
+function closeModal(){ modalBg.style.display="none"; }
+modalBg.addEventListener("click",(e)=>{ if(e.target===modalBg) closeModal(); });
 
 // 円陣配置
 function positionBases(){
@@ -229,7 +264,6 @@ let annIndex=0,scrolling=false;
 function scrollAnnouncement(){
   if(scrolling) return;
   scrolling=true;
-
   const aliveBases=bases.filter(b=>b.dataset.id!=="本部");
   if(aliveBases.length===0){
     announcementText.style.color="#00ff7f";
@@ -237,9 +271,7 @@ function scrollAnnouncement(){
     scrolling=false;
     return;
   }
-
   const b=aliveBases[annIndex%aliveBases.length];
-
   if(b.dataset.enemies==0){ announcementText.style.color="#00ff7f"; announcementText.textContent=`${b.dataset.id} 敵の撤退を確認、防衛完了！`; }
   else if(b.dataset.hp>50){ announcementText.style.color="#7fe8ff"; announcementText.textContent=`${b.dataset.id} 防衛中、戦線安定`; }
   else{ announcementText.style.color="#ff4b4b"; announcementText.textContent=`${b.dataset.id} 緊急！救援要請！`; }
@@ -250,7 +282,6 @@ function scrollAnnouncement(){
   requestAnimationFrame(()=>{
     announcementText.style.transition="transform 8s linear";
     announcementText.style.transform="translateX(-100%)";
-
     setTimeout(()=>{
       announcementText.style.transition="none";
       announcementText.style.transform="translateX(0%)";
@@ -262,6 +293,15 @@ function scrollAnnouncement(){
     },8000);
   });
 }
+
+// 自分の戦績リンク
+myStatsLink.addEventListener("click",()=>{
+  modalBg.style.display="flex";
+  modalTitle.textContent="自分の戦績";
+  modalBody.innerHTML="<h4>自分の戦績</h4>";
+  const myStats = generateDummyStats("自分");
+  modalBody.innerHTML += `名前: あなた　⚔${myStats[0].kills}　🩹${myStats[0].rescues}　🧭${myStats[0].explored}`;
+});
 
 // 初期呼び出し
 updateStatusPanel();
