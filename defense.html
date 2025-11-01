@@ -1,1 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>防衛画面</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #0a0f1a, #05060a);
+      color: #fff;
+      font-family: "Segoe UI", sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(0, 0, 20, 0.8);
+      color: #00c3ff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 1.3em;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px rgba(0, 200, 255, 0.3);
+    }
+
+    .battlefield {
+      position: relative;
+      width: 80vw;
+      height: 70vh;
+      margin-top: 5vh;
+    }
+
+    .base {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle at 30% 30%, #009dff, #003366);
+      border: 2px solid #00c3ff;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .base:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 20px #00bfff;
+    }
+
+    .announcement {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0, 10, 30, 0.8);
+      color: #00eaff;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 1.1em;
+      border-top: 1px solid #0077aa;
+      letter-spacing: 1px;
+      box-shadow: 0 -2px 10px rgba(0, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <header>🛡 防衛作戦エリア：戦況モニター</header>
+  <div class="battlefield" id="battlefield"></div>
+  <div class="announcement" id="announcement">戦況データをロード中……</div>
+
+  <script>
+    const battlefield = document.getElementById('battlefield');
+    const announcement = document.getElementById('announcement');
+    const baseCount = 20;
+    const radius = 250;
+    const centerX = battlefield.clientWidth / 2;
+    const centerY = battlefield.clientHeight / 1.4; // 少し下寄り
+
+    const bases = [];
+
+    for (let i = 0; i < baseCount; i++) {
+      const angle = (i / baseCount) * 2 * Math.PI;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+
+      const base = document.createElement('div');
+      base.className = 'base';
+      base.style.left = `${x - 30}px`;
+      base.style.top = `${y - 30}px`;
+      base.textContent = i + 1;
+      base.dataset.hp = 100;
+
+      base.addEventListener('click', () => {
+        // HP減少シミュレーション
+        let hp = Math.max(0, base.dataset.hp - Math.floor(Math.random() * 30 + 10));
+        base.dataset.hp = hp;
+
+        let statusText;
+        if (hp > 70) {
+          statusText = `拠点${i + 1}：防衛順調です！`;
+        } else if (hp > 40) {
+          statusText = `拠点${i + 1}：被害発生、支援要請中！`;
+        } else if (hp > 0) {
+          statusText = `拠点${i + 1}：危険！防衛線が崩壊寸前！`;
+        } else {
+          statusText = `拠点${i + 1}：陥落……！`;
+          base.style.background = 'radial-gradient(circle at 30% 30%, #400000, #220000)';
+          base.style.borderColor = '#ff0000';
+        }
+
+        announcement.textContent = statusText;
+      });
+
+      bases.push(base);
+      battlefield.appendChild(base);
+    }
+
+    announcement.textContent = '防衛エリア展開完了。各拠点へのアクセスが可能です。';
+  </script>
+</body>
+</html>
 
