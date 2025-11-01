@@ -4,17 +4,25 @@
 <meta charset="UTF-8">
 <title>トップページ</title>
 <style>
-body { font-family: sans-serif; padding: 20px; }
-nav a { margin-right: 15px; text-decoration: none; font-weight: bold; color: #333; }
+body { font-family: sans-serif; margin: 0; padding: 20px; }
+a { display: block; margin: 10px 0; font-size: 18px; color: #0066cc; text-decoration: none; }
+a:hover { text-decoration: underline; }
+#updates { margin-top: 20px; padding: 10px; background: #f5f5f5; border: 1px solid #ccc; }
 </style>
 </head>
 <body>
-<h1>メインメニュー</h1>
-<nav>
-  <a href="defense/defense.html">防衛戦</a>
-  <a href="chat/chat.html">チャット</a>
-  <a href="craft/craft.html">クラフト</a>
-</nav>
-<p>ここから各画面に移動できます。</p>
+
+<h1>ようこそ</h1>
+
+<a href="defense/defense.html">防衛戦／探索画面へ</a>
+<a href="chat/chat.html">RPチャットへ</a>
+<a href="craft/craft.html">クラフト画面へ</a>
+<a href="gm/updates.html">GM更新情報管理画面へ</a>
+
+<div id="updates">
+<h2>更新情報</h2>
+<p>ここにGMが更新した内容が表示されます。</p>
+</div>
+
 </body>
 </html>
