@@ -16,8 +16,6 @@
     <label>4桁パスワード:</label><br><input type="password" id="charPW" maxlength="4" required><br>
     <label>合言葉:</label><br><input type="text" id="charHint" required><br>
     <label>キャラクター名:</label><br><input type="text" id="charName" required><br>
-    <label>アイコン (120x120推奨):</label><br><input type="file" id="charIcon" accept="image/*"><br>
-    <label>立ち絵 (700x800推奨):</label><br><input type="file" id="charStanding" accept="image/*"><br>
     <button type="submit">登録</button>
   </form>
 </div>
@@ -32,34 +30,13 @@ regForm.addEventListener("submit",(e)=>{
     id: document.getElementById("charID").value,
     password: document.getElementById("charPW").value,
     hint: document.getElementById("charHint").value,
-    name: document.getElementById("charName").value,
-    icon: "", standing: ""
+    name: document.getElementById("charName").value
   };
 
-  // アイコンと立ち絵はFileReaderでbase64化
-  const iconFile=document.getElementById("charIcon").files[0];
-  const standingFile=document.getElementById("charStanding").files[0];
-
-  function finishAdd(){
-    addCharacter(char);
-    alert("登録完了！");
-    window.location.href="index.html";
-  }
-
-  if(iconFile){
-    const reader=new FileReader();
-    reader.onload=(e)=>{ char.icon=e.target.result; 
-      if(standingFile){ readStanding(); } else { finishAdd(); } };
-    reader.readAsDataURL(iconFile);
-  } else { if(standingFile){ readStanding(); } else { finishAdd(); } }
-
-  function readStanding(){
-    const reader=new FileReader();
-    reader.onload=(e)=>{ char.standing=e.target.result; finishAdd(); };
-    reader.readAsDataURL(standingFile);
-  }
+  addCharacter(char);
+  alert("登録完了！");
+  window.location.href="index.html";
 });
 </script>
 </body>
 </html>
-
