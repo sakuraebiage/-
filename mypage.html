@@ -3,22 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <title>マイページ</title>
-<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-<h1>マイページ</h1>
-</header>
+<h2>マイページ</h2>
+<div id="profile"></div>
 
-<div style="padding:20px;">
-<h2>プロフィール編集</h2>
-<div id="charList"></div>
-</div>
-
-<script src="script.js"></script>
 <script>
-renderCharacterList(document.getElementById("charList"));
+const params=new URLSearchParams(window.location.search);
+const id=params.get("id");
+
+let chars=JSON.parse(localStorage.getItem("chars")||"[]");
+const c=chars.find(x=>x.id===id);
+if(!c){ document.getElementById("profile").textContent="キャラクターが見つかりません"; }
+else{
+  const div=document.getElementById("profile");
+  div.innerHTML=`
+    <strong>${c.name}</strong> (ID: ${c.id})<br>
+    合言葉: ${c.hint || "未設定"}<br>
+    直近行動: ${c.lastAction||"なし"}<br>
+    直近発言: ${c.lastMessage||"なし"}<br>
+    <a href="index.html?id=${encodeURIComponent(c.id)}">トップ画面に戻る</a>
+  `;
+}
 </script>
 </body>
 </html>
-
