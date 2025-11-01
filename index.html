@@ -2,50 +2,125 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>トップページ</title>
+<title>星守戦線 - トップページ</title>
 <style>
-body{margin:0;font-family:sans-serif;background:#000;color:#e0e0e0;}
-header{background:#111;padding:10px;}
-header a{color:#8ae1ff;margin:0 10px;text-decoration:none;}
-section{padding:10px;}
-img{width:200px;height:auto;}
+body {
+  margin: 0;
+  font-family: "Consolas", "Roboto Mono", monospace;
+  background: #000;
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: #111;
+  border-bottom: 1px solid #444;
+  width: 100%;
+}
+header h1 { font-size: 1.3em; color: #8ae1ff; }
+nav a {
+  color: #8ae1ff;
+  margin-left: 12px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
+
+#character-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px;
+  width: 90%;
+}
+
+.character-card {
+  background: #111;
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 10px;
+  width: 200px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+.character-card:hover {
+  transform: scale(1.05);
+  border-color: #8ae1ff;
+}
+.character-card img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #8ae1ff;
+}
+.character-name {
+  font-weight: bold;
+  color: #8ae1ff;
+  margin-top: 8px;
+}
+.character-comment {
+  font-size: 0.85em;
+  color: #bbb;
+  margin-top: 4px;
+}
 </style>
 </head>
+
 <body>
 <header>
+  <h1>星守戦線 トップページ</h1>
   <nav>
-    <a href="../index.html">🏠 ホーム</a>
-    <a href="../craft/craft.html">⚒️ クラフト</a>
-    <a href="../items/items.html">🎒 アイテム</a>
-    <a href="../chat/chat.html">💬 チャット</a>
-    <a href="../mypage.html">👤 マイページ</a>
-    <a href="../logout.html">🚪 ログアウト</a>
+    <a href="index.html">🏠 ホーム</a>
+    <a href="defense/defense.html">🛡️ 防衛</a>
+    <a href="craft/craft.html">⚒️ クラフト</a>
+    <a href="items/items.html">🎒 アイテム</a>
+    <a href="chat/chat.html">💬 チャット</a>
+    <a href="mypage.html">👤 マイページ</a>
+    <a href="logout.html">🚪 ログアウト</a>
   </nav>
 </header>
 
-<section id="profileSection"></section>
+<h2>登録キャラクター一覧</h2>
+<div id="character-list"></div>
 
 <script>
-// プロフィール
-const currentCharName = localStorage.getItem("currentChar");
-const allChars = JSON.parse(localStorage.getItem("characters")||"[]");
-const currentChar = allChars.find(c=>c.name===currentCharName);
+// ダミーデータ（後でローカルストレージと連携可能）
+const characters = JSON.parse(localStorage.getItem("characters") || "[]");
 
-const sec = document.getElementById("profileSection");
-if(currentChar){
-  sec.innerHTML = `<h2>${currentChar.name}</h2>
-    <p>${currentChar.profile||"一言設定なし"}</p>
-    ${currentChar.standUrls.length>0?`<img src="${currentChar.standUrls[0]}" alt="立ち絵">`:"立ち絵未設定"}
-    <h3>直近の行動</h3>
-    <ul id="actionsList"></ul>
-  `;
+const list = document.getElementById("character-list");
+if (characters.length === 0) {
+  list.innerHTML = "<p>まだキャラクターが登録されていません。</p>";
+} else {
+  characters.forEach(c => {
+    const card = document.createElement("div");
+    card.classList.add("character-card");
 
-  const actionsList = document.getElementById("actionsList");
-  currentChar.recentActions.slice(-5).forEach(a=>{
-    const li=document.createElement("li"); li.textContent=a; actionsList.appendChild(li);
+    const img = document.createElement("img");
+    img.src = c.iconUrl || "https://placehold.co/120x120?text=No+Icon";
+
+    const name = document.createElement("div");
+    name.classList.add("character-name");
+    name.textContent = c.name;
+
+    const comment = document.createElement("div");
+    comment.classList.add("character-comment");
+    comment.textContent = c.comment || "一言コメントなし";
+
+    card.appendChild(img);
+    card.appendChild(name);
+    card.appendChild(comment);
+    card.addEventListener("click", () => {
+      window.location.href = "mypage.html?name=" + encodeURIComponent(c.name);
+    });
+    list.appendChild(card);
   });
-}else{
-  sec.innerHTML="<p>ログインキャラが見つかりません。登録してください。</p>";
 }
 </script>
 </body>
