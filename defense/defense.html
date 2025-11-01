@@ -7,7 +7,7 @@
 body { font-family: sans-serif; margin: 0; padding: 0; }
 h1 { margin: 10px; }
 a { margin-left: 10px; }
-#container { display: flex; height: 80vh; }
+#container { display: flex; height: 70vh; }
 #map { flex: 3; position: relative; background: #e0f7fa; }
 #statusPanel { flex: 1; padding: 10px; background: #fafafa; border-left: 1px solid #ccc; overflow-y: auto; }
 .base { width: 40px; height: 40px; border-radius: 50%; position: absolute; text-align: center; line-height: 40px; color: #fff; font-weight: bold; }
@@ -15,6 +15,7 @@ a { margin-left: 10px; }
 .user { background: #4caf50; }
 .face { width: 20px; height: 20px; border-radius: 50%; display: inline-block; background: #ffeb3b; margin-right: 2px; vertical-align: middle; }
 #announcements { height: 20vh; background: #fafafa; overflow-y: auto; padding: 10px; border-top: 1px solid #ccc; }
+.progressBar { width: 100%; }
 </style>
 </head>
 <body>
@@ -45,7 +46,10 @@ for(let i=0;i<numBases;i++){
   const angle = 2*Math.PI/numBases*i;
   const x = centerX + radius * Math.cos(angle);
   const y = centerY + radius * Math.sin(angle);
-  bases.push({id:'b'+i, x, y, type:'user', name:'拠点'+(i+1), faces:['A'+i], hp:100, resource:0, enemy:10});
+  bases.push({
+    id:'b'+i, x, y, type:'user', name:'拠点'+(i+1),
+    faces:['A'+i], hp:100, resource:0, enemy:10
+  });
 }
 
 // マップに配置
@@ -64,39 +68,46 @@ bases.forEach(b => {
   map.appendChild(div);
 });
 
-// 拠点ステータス描画
+// 拠点ステータス描画（ゲージ付き）
 function renderStatus(){
   baseStatusDiv.innerHTML='';
   bases.forEach(b=>{
     const div = document.createElement('div');
-    div.style.marginBottom='8px';
+    div.style.marginBottom='10px';
     div.innerHTML = `<strong>${b.name}</strong><br>
-                     HP: ${b.hp}%<br>
-                     リソース: ${b.resource}<br>
-                     残敵: ${b.enemy}`;
+      HP: <progress class="progressBar" value="${b.hp}" max="100"></progress> ${b.hp}%<br>
+      リソース: <progress class="progressBar" value="${b.resource}" max="50"></progress> ${b.resource}<br>
+      残敵: <progress class="progressBar" value="${b.enemy}" max="10"></progress> ${b.enemy}`;
     baseStatusDiv.appendChild(div);
   });
 }
 
-// アナウンス描画
-let logs = ['防衛戦開始！'];
+// 戦況アナウンス描画（危険拠点は赤文字）
 function updateLogs(){
   announcements.innerHTML='';
-  logs.forEach(l=>{
+  bases.forEach(b=>{
     const p = document.createElement('p');
-    p.textContent=l;
+    if(b.hp<30){
+      p.style.color='red';
+      p.textContent = `${b.name}が危険！HP:${b.hp}% 残敵:${b.enemy}`;
+    } else if(b.enemy>7){
+      p.style.color='orange';
+      p.textContent = `${b.name}に敵接近！残敵:${b.enemy}`;
+    } else {
+      p.textContent = `${b.name}は安定。HP:${b.hp}% 残敵:${b.enemy}`;
+    }
     announcements.appendChild(p);
   });
 }
 
-// テスト用：5秒ごとにHPランダム減少とリソース増加
+// テスト用：5秒ごとにHPランダム減少・リソース増加・敵変化
 setInterval(()=>{
   bases.forEach(b=>{
     b.hp = Math.max(0, b.hp - Math.floor(Math.random()*5));
     b.resource += Math.floor(Math.random()*3);
+    b.enemy = Math.max(0, Math.min(10, b.enemy + Math.floor(Math.random()*3)-1));
   });
   renderStatus();
-  logs = bases.map(b=>`${b.name} HP:${b.hp}% 残敵:${b.enemy}`);
   updateLogs();
 },5000);
 
