@@ -96,6 +96,7 @@ nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
 
 <h2>キャラ管理</h2>
 
+ <script> 
 <!-- 新規キャラ作成 -->
 <div id="newCharForm">
   <input type="text" id="newCharName" placeholder="キャラ名">
@@ -104,8 +105,6 @@ nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
 
 <!-- 登録済みキャラ一覧 -->
 <div id="charList"></div>
-
-<script>
 let userData = JSON.parse(localStorage.getItem("user_chars")) || { chars:[], selectedCharIndex:0 };
 
 function renderCharList() {
@@ -146,8 +145,6 @@ function selectChar(index){
 }
 
 renderCharList();
-</script>
- 
 
 <script>
 // ダミーデータ（後でローカルストレージと連携可能）
