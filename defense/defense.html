@@ -2,126 +2,78 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>防衛・救助統合画面</title>
+<title>拠点戦況システム</title>
 <style>
-  body {
-    background: #0a0a0a;
-    color: #f0f0f0;
-    font-family: "Segoe UI", sans-serif;
-    text-align: center;
-    overflow-y: auto;
-  }
-  h1 { margin: 10px 0; }
-  .announce {
-    background: #222;
-    color: #0f0;
-    padding: 8px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-  }
-  .bases {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
-  }
-  .base {
-    background: #111;
-    border: 2px solid #666;
-    border-radius: 10px;
-    width: 200px;
-    padding: 10px;
-  }
-  .base.damaged { border-color: #f00; }
-  .base.rescued { border-color: #0f0; }
-  button {
-    background: #333;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 6px 10px;
-    cursor: pointer;
-  }
-  button:hover { background: #444; }
-  #resourceDisplay {
-    margin: 15px;
-    font-size: 18px;
-  }
+body {
+  background: #101820;
+  color: #f0f0f0;
+  font-family: "serif";
+  text-align: center;
+  padding: 20px;
+}
+#log {
+  width: 80%;
+  height: 200px;
+  margin: 20px auto;
+  overflow-y: scroll;
+  background: #1a2433;
+  border: 2px solid #3a4a66;
+  padding: 10px;
+  text-align: left;
+}
+button {
+  background: #334466;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button:hover {
+  background: #446699;
+}
 </style>
 </head>
 <body>
 
-<h1>防衛・救助統合画面</h1>
-<div class="announce" id="announceArea">システムオンライン</div>
-<div id="resourceDisplay">救援物資: <span id="resources">0</span></div>
+<h1>🌙 拠点戦況</h1>
+<div id="resources">
+  森：<span id="forest">100</span>　
+  砂漠：<span id="desert">100</span>　
+  港：<span id="port">100</span>
+</div>
 
-<div class="bases" id="basesContainer"></div>
+<div>
+  <button onclick="battle('forest')">森で戦闘</button>
+  <button onclick="battle('desert')">砂漠で戦闘</button>
+  <button onclick="battle('port')">港で戦闘</button>
+</div>
+
+<div id="log"></div>
 
 <script>
-const BASE_COUNT = 20;
-let resources = parseInt(localStorage.getItem("resources") || "0");
-let baseHPs = JSON.parse(localStorage.getItem("baseHPs") || JSON.stringify(Array(BASE_COUNT).fill(100)));
+let resources = {
+  forest: 100,
+  desert: 100,
+  port: 100
+};
 
-function updateDisplay() {
-  document.getElementById("resources").textContent = resources;
-  localStorage.setItem("resources", resources);
-  localStorage.setItem("baseHPs", JSON.stringify(baseHPs));
-  
-  const container = document.getElementById("basesContainer");
-  container.innerHTML = "";
-  baseHPs.forEach((hp, i) => {
-    const div = document.createElement("div");
-    div.className = "base";
-    if (hp <= 0) div.classList.add("damaged");
-    if (hp > 0 && hp < 100) div.classList.remove("rescued");
-    if (hp === 100) div.classList.add("rescued");
-    div.innerHTML = `
-      <h3>第${i+1}拠点</h3>
-      <p>耐久: <span>${hp}</span>/100</p>
-      <button onclick="attackBase(${i})">敵襲</button>
-      <button onclick="rescueBase(${i})">救助</button>
-    `;
-    container.appendChild(div);
-  });
-}
+function battle(place) {
+  const win = Math.random() < 0.5; // 50%で勝利
+  const log = document.getElementById("log");
+  const now = new Date().toLocaleTimeString();
 
-function attackBase(i) {
-  if (baseHPs[i] > 0) {
-    const dmg = Math.floor(Math.random() * 10) + 5;
-    baseHPs[i] = Math.max(0, baseHPs[i] - dmg);
-    const gain = Math.floor(Math.random() * 5) + 3;
-    resources += gain;
-    announce(`第${i+1}拠点が攻撃を受けた！${dmg}ダメージ。資源+${gain}`);
-    updateDisplay();
+  if (win) {
+    resources[place] += 10;
+    document.getElementById(place).textContent = resources[place];
+    log.innerHTML += `<div>[${now}] ${place} の戦闘で勝利！資源 +10</div>`;
   } else {
-    announce(`第${i+1}拠点はすでに壊滅しています。`);
+    log.innerHTML += `<div>[${now}] ${place} の戦闘で敗北…資源変動なし</div>`;
   }
-}
 
-function rescueBase(i) {
-  if (baseHPs[i] >= 100) {
-    announce(`第${i+1}拠点はすでに完全修復済みです。`);
-    return;
-  }
-  if (resources < 5) {
-    announce(`資源が足りません！（必要:5）`);
-    return;
-  }
-  resources -= 5;
-  const heal = 20;
-  baseHPs[i] = Math.min(baseHPs[i] + heal, 100);
-  announce(`第${i+1}拠点を救助！耐久が${heal}回復。`);
-  updateDisplay();
+  log.scrollTop = log.scrollHeight; // 自動スクロール
 }
-
-function announce(text) {
-  const area = document.getElementById("announceArea");
-  area.textContent = text;
-  area.style.color = "#0f0";
-  setTimeout(() => { area.style.color = "#ccc"; }, 2000);
-}
-
-updateDisplay();
 </script>
 
 </body>
