@@ -94,6 +94,61 @@ nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
 <h2>登録キャラクター一覧</h2>
 <div id="character-list"></div>
 
+<h2>キャラ管理</h2>
+
+<!-- 新規キャラ作成 -->
+<div id="newCharForm">
+  <input type="text" id="newCharName" placeholder="キャラ名">
+  <button onclick="addNewChar()">追加</button>
+</div>
+
+<!-- 登録済みキャラ一覧 -->
+<div id="charList"></div>
+
+<script>
+let userData = JSON.parse(localStorage.getItem("user_chars")) || { chars:[], selectedCharIndex:0 };
+
+function renderCharList() {
+  const list = document.getElementById("charList");
+  list.innerHTML = "";
+  userData.chars.forEach((char, i) => {
+    const div = document.createElement("div");
+    div.style.marginBottom="8px";
+    const selectedMark = userData.selectedCharIndex===i ? "🌟" : "";
+    div.innerHTML = `
+      ${selectedMark} <strong>${char.name}</strong>
+      <img src="${char.icon||'default_icon.png'}" width="32" height="32">
+      <button onclick="selectChar(${i})">切替</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function addNewChar() {
+  const name = document.getElementById("newCharName").value.trim();
+  if(!name) return alert("名前を入力してください！");
+  const newChar = { name, icon:"", stats:{}, skills:[], points:0 };
+  userData.chars.push(newChar);
+  userData.selectedCharIndex = userData.chars.length-1; // 追加したキャラを即選択
+  localStorage.setItem("user_chars", JSON.stringify(userData));
+  renderCharList();
+  document.getElementById("newCharName").value="";
+}
+
+// キャラ切替
+function selectChar(index){
+  userData.selectedCharIndex=index;
+  localStorage.setItem("user_chars", JSON.stringify(userData));
+  renderCharList();
+  // 各ページの表示を更新
+  currentChar = userData.chars[index];
+  updateAllPages(); 
+}
+
+renderCharList();
+</script>
+ 
+
 <script>
 // ダミーデータ（後でローカルストレージと連携可能）
 const characters = JSON.parse(localStorage.getItem("characters") || "[]");
