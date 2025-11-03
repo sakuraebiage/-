@@ -70,10 +70,39 @@ nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
   color: #bbb;
   margin-top: 4px;
 }
+
+#newCharForm {
+  margin: 20px 0;
+}
+#newCharForm input {
+  padding: 5px;
+  font-size: 1em;
+}
+#newCharForm button {
+  padding: 5px 10px;
+  margin-left: 5px;
+  cursor: pointer;
+  background: #111;
+  color: #8ae1ff;
+  border: 1px solid #8ae1ff;
+}
+#newCharForm button:hover {
+  background: #8ae1ff;
+  color: #000;
+}
+
+#charList div {
+  margin-bottom: 8px;
+}
+#charList img {
+  vertical-align: middle;
+  border-radius: 50%;
+  margin: 0 5px;
+}
 </style>
 </head>
-
 <body>
+
 <header>
   <h1>星守戦線 トップページ</h1>
   <nav>
@@ -82,11 +111,9 @@ nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
     <a href="craft/craft.html">⚒️ クラフト</a>
     <a href="items/items.html">🎒 アイテム</a>
     <a href="chat/chat.html">💬 チャット</a>
-    <a href="mypage.html">💪　訓練</a>
+    <a href="mypage.html">💪 訓練</a>
     <a href="battle_setup.html">⚔ 戦闘設定</a>
-  　<a href="shop.html">🏪 購買</a>
-  　<a href="craft.html">⚒ クラフト</a>
-  　<a href="mypage.html">👤 マイページ</a>
+    <a href="shop.html">🏪 購買</a>
     <a href="logout.html">🚪 ログアウト</a>
   </nav>
 </header>
@@ -95,9 +122,7 @@ nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
 <div id="character-list"></div>
 
 <h2>キャラ管理</h2>
-
- <script> 
-<!-- 新規キャラ作成 -->
+<!-- 新規キャラ作成フォーム -->
 <div id="newCharForm">
   <input type="text" id="newCharName" placeholder="キャラ名">
   <button onclick="addNewChar()">追加</button>
@@ -105,33 +130,38 @@ nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
 
 <!-- 登録済みキャラ一覧 -->
 <div id="charList"></div>
+
+<script>
+// ユーザーデータ取得
 let userData = JSON.parse(localStorage.getItem("user_chars")) || { chars:[], selectedCharIndex:0 };
 
+// キャラ一覧描画
 function renderCharList() {
   const list = document.getElementById("charList");
   list.innerHTML = "";
   userData.chars.forEach((char, i) => {
     const div = document.createElement("div");
-    div.style.marginBottom="8px";
     const selectedMark = userData.selectedCharIndex===i ? "🌟" : "";
     div.innerHTML = `
       ${selectedMark} <strong>${char.name}</strong>
-      <img src="${char.icon||'default_icon.png'}" width="32" height="32">
+      <img src="${char.icon||'https://placehold.co/32x32?text=No+Icon'}" width="32" height="32">
       <button onclick="selectChar(${i})">切替</button>
     `;
     list.appendChild(div);
   });
 }
 
+// 新規キャラ追加
 function addNewChar() {
   const name = document.getElementById("newCharName").value.trim();
   if(!name) return alert("名前を入力してください！");
   const newChar = { name, icon:"", stats:{}, skills:[], points:0 };
   userData.chars.push(newChar);
-  userData.selectedCharIndex = userData.chars.length-1; // 追加したキャラを即選択
+  userData.selectedCharIndex = userData.chars.length-1;
   localStorage.setItem("user_chars", JSON.stringify(userData));
   renderCharList();
   document.getElementById("newCharName").value="";
+  renderCharacterCards();
 }
 
 // キャラ切替
@@ -139,27 +169,24 @@ function selectChar(index){
   userData.selectedCharIndex=index;
   localStorage.setItem("user_chars", JSON.stringify(userData));
   renderCharList();
-  // 各ページの表示を更新
   currentChar = userData.chars[index];
-  updateAllPages(); 
+  updateAllPages?.();
 }
 
-renderCharList();
-
-<script>
-// ダミーデータ（後でローカルストレージと連携可能）
-const characters = JSON.parse(localStorage.getItem("characters") || "[]");
-
-const list = document.getElementById("character-list");
-if (characters.length === 0) {
-  list.innerHTML = "<p>まだキャラクターが登録されていません。</p>";
-} else {
-  characters.forEach(c => {
+// トップページ用キャラクターカード描画
+function renderCharacterCards() {
+  const list = document.getElementById("character-list");
+  list.innerHTML = "";
+  if(userData.chars.length === 0){
+    list.innerHTML = "<p>まだキャラクターが登録されていません。</p>";
+    return;
+  }
+  userData.chars.forEach(c => {
     const card = document.createElement("div");
     card.classList.add("character-card");
 
     const img = document.createElement("img");
-    img.src = c.iconUrl || "https://placehold.co/120x120?text=No+Icon";
+    img.src = c.icon || "https://placehold.co/120x120?text=No+Icon";
 
     const name = document.createElement("div");
     name.classList.add("character-name");
@@ -172,12 +199,20 @@ if (characters.length === 0) {
     card.appendChild(img);
     card.appendChild(name);
     card.appendChild(comment);
+
     card.addEventListener("click", () => {
+      // マイページに飛ばす場合
       window.location.href = "mypage.html?name=" + encodeURIComponent(c.name);
     });
+
     list.appendChild(card);
   });
 }
+
+// 初期描画
+renderCharList();
+renderCharacterCards();
 </script>
+
 </body>
 </html>
