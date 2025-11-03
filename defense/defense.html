@@ -2,290 +2,127 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>星守戦線戦況 - 拠点モニタリング</title>
+<title>防衛・救助統合画面</title>
 <style>
-body {
-  margin:0;
-  font-family:"Consolas","Roboto Mono",monospace;
-  background:#000;
-  color:#e0e0e0;
-  display:flex;
-  flex-direction:column;
-}
-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 20px;
-  background:#111;
-  border-bottom:1px solid #444;
-}
-header h1 { font-size:1.2em; color:#8ae1ff; }
-nav a { color:#8ae1ff; margin-left:12px; text-decoration:none; transition:0.3s; }
-nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
-
-#announcement {
-  width:100%;
-  text-align:center;
-  font-size:1em;
-  white-space:nowrap;
-  overflow:hidden;
-  height:2em;
-  margin-top:5px;
-  color:#7fe8ff;
-}
-.scroll-text { display:inline-block; }
-
-#main-container { display:flex; flex:1; }
-#map {
-  position:relative;
-  flex:1;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-#status-panel {
-  width:280px;
-  background:#111;
-  border-left:1px solid #555;
-  padding:10px;
-  overflow-y:auto;
-  max-height:100%;
-}
-.status-entry { border-bottom:1px solid #333; padding:6px 0; font-size:0.85em; }
-
-.base {
-  position:absolute;
-  width:55px; height:55px;
-  border-radius:50%;
-  background:rgba(90,200,255,0.2);
-  border:2px solid #8ae1ff;
-  display:flex; justify-content:center; align-items:center;
-  font-size:0.8em;
-  color:#8ae1ff;
-  cursor:pointer;
-  transition:all 0.5s ease;
-}
-.hp-bar {
-  width:40px; height:4px;
-  background:#222;
-  border:1px solid #444;
-  position:absolute;
-  bottom:-8px;
-  left:7px;
-  border-radius:2px;
-}
-.hp-fill { height:100%; border-radius:2px; background:#00ff9d; }
-
-/* モーダル */
-.modal-bg {
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.6);
-  justify-content:center;
-  align-items:center;
-  z-index:100;
-}
-.modal-content {
-  background:#222;
-  padding:20px;
-  border:2px solid #8ae1ff;
-  border-radius:8px;
-  text-align:center;
-  max-height:80%;
-  overflow-y:auto;
-}
-.modal-content button {
-  margin:5px;
-  padding:8px 12px;
-  background:#111;
-  border:1px solid #8ae1ff;
-  color:#8ae1ff;
-  cursor:pointer;
-}
-.modal-content button:hover {
-  background:#8ae1ff; color:#000;
-}
+  body {
+    background: #0a0a0a;
+    color: #f0f0f0;
+    font-family: "Segoe UI", sans-serif;
+    text-align: center;
+    overflow-y: auto;
+  }
+  h1 { margin: 10px 0; }
+  .announce {
+    background: #222;
+    color: #0f0;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+  .bases {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+  .base {
+    background: #111;
+    border: 2px solid #666;
+    border-radius: 10px;
+    width: 200px;
+    padding: 10px;
+  }
+  .base.damaged { border-color: #f00; }
+  .base.rescued { border-color: #0f0; }
+  button {
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  button:hover { background: #444; }
+  #resourceDisplay {
+    margin: 15px;
+    font-size: 18px;
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>戦況解析システム　animus</h1>
-  <nav>
-    <a href="../index.html">🏠 ホーム</a>
-    <a href="../craft/craft.html">⚒️ クラフト</a>
-    <a href="../items/items.html">🎒 アイテム</a>
-    <a href="../chat/chat.html">💬 チャット</a>
-    <a href="../mypage.html">👤 マイページ</a>
-    <a href="../logout.html">🚪 ログアウト</a>
-  </nav>
-</header>
 
+<h1>防衛・救助統合画面</h1>
+<div class="announce" id="announceArea">システムオンライン</div>
+<div id="resourceDisplay">救援物資: <span id="resources">0</span></div>
 
-<div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
-
-<div id="main-container">
-  <div id="map"></div>
-  <div id="status-panel"></div>
-</div>
-
-<!-- モーダル -->
-<div class="modal-bg" id="modalBg">
-  <div class="modal-content" id="modalContent">
-    <h3 id="modalTitle"></h3>
-    <div id="modalBody"></div>
-    <div>
-      <button id="combatBtn">⚔ 戦闘</button>
-      <button id="exploreBtn">🧭 探索</button>
-      <button id="rescueBtn">🩹 救助</button>
-    </div>
-    <button onclick="closeModal()">閉じる</button>
-  </div>
-</div>
+<div class="bases" id="basesContainer"></div>
 
 <script>
-const map = document.getElementById("map");
-const statusPanel = document.getElementById("status-panel");
-const announcementText = document.getElementById("announcementText");
-const modalBg = document.getElementById("modalBg");
-const modalTitle = document.getElementById("modalTitle");
-const modalBody = document.getElementById("modalBody");
+const BASE_COUNT = 20;
+let resources = parseInt(localStorage.getItem("resources") || "0");
+let baseHPs = JSON.parse(localStorage.getItem("baseHPs") || JSON.stringify(Array(BASE_COUNT).fill(100)));
 
-let currentChar = JSON.parse(localStorage.getItem("currentChar")) || { name:"未設定", recentActions:[] };
-
-const bases = [];
-const numBases = 20;
-const radius = 250;
-
-// 拠点生成
-for(let i=0;i<numBases;i++){
-  const base=document.createElement("div");
-  base.classList.add("base");
-  base.dataset.id=i===0?"本部":`拠点${i}`;
-  base.dataset.hp=100;
-  base.dataset.resource=(Math.random()*4000+1000).toFixed(0);
-  base.dataset.enemies=Math.floor(Math.random()*300);
-  base.textContent=base.dataset.id;
-
-  const hpBar=document.createElement("div");
-  hpBar.classList.add("hp-bar");
-  const hpFill=document.createElement("div");
-  hpFill.classList.add("hp-fill");
-  hpBar.appendChild(hpFill);
-  base.appendChild(hpBar);
-  map.appendChild(base);
-  bases.push(base);
-
-  // クリックでモーダル表示
-  base.addEventListener("click", ()=>{
-    modalBg.style.display="flex";
-    modalTitle.textContent = base.dataset.id;
-    modalBody.innerHTML = `<p>選択した拠点: ${base.dataset.id}</p>`;
-    selectedBase = base;
+function updateDisplay() {
+  document.getElementById("resources").textContent = resources;
+  localStorage.setItem("resources", resources);
+  localStorage.setItem("baseHPs", JSON.stringify(baseHPs));
+  
+  const container = document.getElementById("basesContainer");
+  container.innerHTML = "";
+  baseHPs.forEach((hp, i) => {
+    const div = document.createElement("div");
+    div.className = "base";
+    if (hp <= 0) div.classList.add("damaged");
+    if (hp > 0 && hp < 100) div.classList.remove("rescued");
+    if (hp === 100) div.classList.add("rescued");
+    div.innerHTML = `
+      <h3>第${i+1}拠点</h3>
+      <p>耐久: <span>${hp}</span>/100</p>
+      <button onclick="attackBase(${i})">敵襲</button>
+      <button onclick="rescueBase(${i})">救助</button>
+    `;
+    container.appendChild(div);
   });
 }
 
-// モーダル閉じる
-function closeModal(){ modalBg.style.display="none"; }
-modalBg.addEventListener("click",(e)=>{ if(e.target===modalBg) closeModal(); });
-
-// 円陣配置
-function positionBases(){
-  const centerX=map.offsetWidth/2;
-  const centerY=map.offsetHeight/2 + 250;
-  bases.forEach((base,i)=>{
-    if(i===0){ base.style.left=`${centerX-27.5}px`; base.style.top=`${centerY-27.5}px`; return; }
-    const angle=(i/19)*2*Math.PI;
-    const distortX=Math.sin(angle*3)*20;
-    const distortY=Math.cos(angle*5)*20;
-    base.style.left=`${centerX + radius*Math.cos(angle)+distortX-27.5}px`;
-    base.style.top=`${centerY + radius*Math.sin(angle)+distortY-27.5}px`;
-  });
-}
-positionBases();
-window.addEventListener("resize",positionBases);
-
-// 拠点状態更新
-function updateBases(){
-  bases.forEach(base=>{
-    if(base.dataset.id==="本部") return;
-    const hp=Math.max(0, base.dataset.hp - Math.random()*5);
-    base.dataset.hp=hp.toFixed(0);
-    base.dataset.enemies=Math.max(0, base.dataset.enemies - Math.random()*5).toFixed(0);
-    base.dataset.resource=(parseInt(base.dataset.resource)+Math.random()*30-15).toFixed(0);
-    const hpFill=base.querySelector(".hp-fill");
-    hpFill.style.width=`${hp}%`;
-    hpFill.style.background = hp>60?"#00ff9d": hp>30?"#ffeb3b":"#ff4b4b";
-  });
-  updateStatusPanel();
+function attackBase(i) {
+  if (baseHPs[i] > 0) {
+    const dmg = Math.floor(Math.random() * 10) + 5;
+    baseHPs[i] = Math.max(0, baseHPs[i] - dmg);
+    const gain = Math.floor(Math.random() * 5) + 3;
+    resources += gain;
+    announce(`第${i+1}拠点が攻撃を受けた！${dmg}ダメージ。資源+${gain}`);
+    updateDisplay();
+  } else {
+    announce(`第${i+1}拠点はすでに壊滅しています。`);
+  }
 }
 
-// ステータスパネル更新
-function updateStatusPanel(){
-  statusPanel.innerHTML="<h3>拠点ステータス</h3>";
-  bases.forEach(base=>{
-    const entry=document.createElement("div");
-    entry.classList.add("status-entry");
-    entry.innerHTML=`<strong>${base.dataset.id}</strong><br>
-      💚HP: ${base.dataset.hp}%　🪨資源: ${base.dataset.resource}　👾敵数: ${base.dataset.enemies}`;
-    statusPanel.appendChild(entry);
-  });
-}
-
-// 横スクロールアナウンス
-let annIndex=0,scrolling=false;
-function scrollAnnouncement(){
-  if(scrolling) return;
-  scrolling=true;
-  const aliveBases=bases.filter(b=>b.dataset.id!=="本部");
-  if(aliveBases.length===0){
-    announcementText.style.color="#00ff7f";
-    announcementText.textContent="全拠点、防衛完了！";
-    scrolling=false;
+function rescueBase(i) {
+  if (baseHPs[i] >= 100) {
+    announce(`第${i+1}拠点はすでに完全修復済みです。`);
     return;
   }
-  const b=aliveBases[annIndex%aliveBases.length];
-  announcementText.style.color = b.dataset.hp>50?"#7fe8ff":"#ff4b4b";
-  announcementText.textContent = `${b.dataset.id} 防衛中、状況更新`;
-
-  announcementText.style.transition="none";
-  announcementText.style.transform="translateX(100%)";
-  requestAnimationFrame(()=>{
-    announcementText.style.transition="transform 8s linear";
-    announcementText.style.transform="translateX(-100%)";
-    setTimeout(()=>{
-      announcementText.style.transition="none";
-      announcementText.style.transform="translateX(0%)";
-      setTimeout(()=>{
-        annIndex++;
-        scrolling=false;
-        scrollAnnouncement();
-      },3000);
-    },8000);
-  });
+  if (resources < 5) {
+    announce(`資源が足りません！（必要:5）`);
+    return;
+  }
+  resources -= 5;
+  const heal = 20;
+  baseHPs[i] = Math.min(baseHPs[i] + heal, 100);
+  announce(`第${i+1}拠点を救助！耐久が${heal}回復。`);
+  updateDisplay();
 }
 
-// 行動記録追加
-function addAction(action){
-  const timestamp = new Date().toLocaleTimeString();
-  currentChar.recentActions.unshift(`[${timestamp}] ${action}`);
-  if(currentChar.recentActions.length>20) currentChar.recentActions.pop();
-  localStorage.setItem("currentChar", JSON.stringify(currentChar));
+function announce(text) {
+  const area = document.getElementById("announceArea");
+  area.textContent = text;
+  area.style.color = "#0f0";
+  setTimeout(() => { area.style.color = "#ccc"; }, 2000);
 }
 
-// ボタンイベント
-let selectedBase = null;
-document.getElementById("combatBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で戦闘行動`); closeModal(); } };
-document.getElementById("exploreBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で探索行動`); closeModal(); } };
-document.getElementById("rescueBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で救助行動`); closeModal(); } };
-
-// 初期呼び出し
-updateStatusPanel();
-updateBases();
-scrollAnnouncement();
-setInterval(updateBases,5000);
+updateDisplay();
 </script>
+
 </body>
 </html>
