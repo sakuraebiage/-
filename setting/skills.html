@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>スキル登録</title>
+<style>
+body {
+  background: #0b0b0b; color: #e0e0e0;
+  font-family: "Consolas", "Roboto Mono", monospace;
+  display: flex; flex-direction: column; align-items: center;
+}
+form {
+  background: #111; border: 1px solid #444;
+  padding: 15px; border-radius: 10px; width: 400px;
+}
+label { display: block; margin-top: 8px; }
+input, select, textarea {
+  width: 100%; padding: 6px; border: 1px solid #333;
+  background: #000; color: #fff; border-radius: 4px;
+}
+button { margin-top: 12px; padding: 6px 12px; }
+#skillList { margin-top: 20px; width: 90%; }
+.skill-item {
+  border-bottom: 1px solid #333;
+  padding: 6px; display: flex; justify-content: space-between;
+}
+</style>
+</head>
+<body>
+
+<h1>⚙️ スキル登録</h1>
+<form id="skillForm">
+  <label>スキル名 <input type="text" id="skillName" required></label>
+  <label>種類
+    <select id="skillType">
+      <option value="physical">物理</option>
+      <option value="magical">魔法</option>
+      <option value="heal">回復</option>
+      <option value="buff">強化</option>
+      <option value="debuff">弱体</option>
+    </select>
+  </label>
+  <label>属性
+    <select id="skillElement">
+      <option value="none">無</option>
+      <option value="fire">火</option>
+      <option value="water">水</option>
+      <option value="wind">風</option>
+      <option value="thunder">雷</option>
+      <option value="light">光</option>
+      <option value="dark">闇</option>
+    </select>
+  </label>
+  <label>対象
+    <select id="skillTarget">
+      <option value="enemy">敵単体</option>
+      <option value="allEnemies">敵全体</option>
+      <option value="ally">味方単体</option>
+      <option value="allAllies">味方全体</option>
+      <option value="self">自分</option>
+    </select>
+  </label>
+  <label>威力倍率 <input type="number" id="skillPower" value="1.0" step="0.1"></label>
+  <label>命中率 <input type="number" id="skillAccuracy" value="100" step="1"></label>
+  <label>消費コスト <input type="number" id="skillCost" value="10"></label>
+  <label>クールダウン <input type="number" id="skillCooldown" value="0"></label>
+  <label>説明 <textarea id="skillDesc" rows="2"></textarea></label>
+  <label>アイコンURL <input type="text" id="skillIcon" placeholder="https://..."></label>
+  <button type="submit">登録</button>
+</form>
+
+<h2>登録済みスキル一覧</h2>
+<div id="skillList"></div>
+
+<script>
+const form = document.getElementById("skillForm");
+let skillList = JSON.parse(localStorage.getItem("skill_list")) || [];
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+
+  const newSkill = {
+    id: "skill_" + Date.now(),
+    name: skillName.value,
+    type: skillType.value,
+    element: skillElement.value,
+    target: skillTarget.value,
+    power: parseFloat(skillPower.value),
+    accuracy: parseInt(skillAccuracy.value),
+    cost: parseInt(skillCost.value),
+    cooldown: parseInt(skillCooldown.value),
+    description: skillDesc.value,
+    icon: skillIcon.value,
+  };
+
+  skillList.push(newSkill);
+  localStorage.setItem("skill_list", JSON.stringify(skillList));
+  renderList();
+  form.reset();
+});
+
+function renderList() {
+  const list = document.getElementById("skillList");
+  list.innerHTML = "";
+  skillList.forEach(s => {
+    const div = document.createElement("div");
+    div.className = "skill-item";
+    div.innerHTML = `
+      <div>
+        <img src="${s.icon || "https://placehold.co/32x32"}" width="32" height="32">
+        <strong>${s.name}</strong>（${s.type} / ${s.element}）<br>
+        <small>${s.description}</small>
+      </div>
+      <button onclick="deleteSkill('${s.id}')">削除</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function deleteSkill(id) {
+  skillList = skillList.filter(s => s.id !== id);
+  localStorage.setItem("skill_list", JSON.stringify(skillList));
+  renderList();
+}
+
+renderList();
+</script>
+</body>
+</html>
+
