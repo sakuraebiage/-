@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>戦闘設定 - 星守戦線</title>
+<style>
+body {
+  font-family: "Consolas", "Roboto Mono", monospace;
+  background: #000;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 20px;
+}
+h1 { color: #8ae1ff; }
+input, select, button {
+  background: #111;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 5px;
+  margin: 4px;
+  border-radius: 5px;
+}
+button:hover { background: #333; cursor: pointer; }
+
+#skill-list {
+  border: 1px solid #444;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+.skill-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #333;
+  padding: 5px;
+}
+.skill-item span {
+  flex: 1;
+}
+#selected-skills {
+  margin-top: 15px;
+  border: 1px solid #555;
+  padding: 10px;
+}
+.slot {
+  border: 1px solid #333;
+  padding: 5px;
+  margin: 5px 0;
+}
+.favorite {
+  color: gold;
+  cursor: pointer;
+  margin-left: 6px;
+}
+</style>
+</head>
+
+<body>
+<h1>⚔ 戦闘設定</h1>
+
+<h2>スキル設定</h2>
+
+<label>カテゴリ:
+<select id="category">
+  <option value="all">すべて</option>
+  <option value="physical">物理</option>
+  <option value="magic">魔法</option>
+  <option value="heal">回復</option>
+  <option value="support">補助</option>
+  <option value="special">特殊</option>
+</select>
+</label>
+
+<input type="text" id="search" placeholder="スキル名を検索...">
+<button onclick="filterSkills()">検索</button>
+
+<div id="skill-list"></div>
+
+<h3>選択中のスキル枠（最大16）</h3>
+<div id="selected-skills"></div>
+
+<script>
+// 仮スキルデータ（あとで600個に拡張可能）
+const skills = [
+  { name: "スラッシュ", category: "physical", desc: "物理攻撃（単体）威力120" },
+  { name: "ダブルスラッシュ", category: "physical", desc: "2連物理攻撃（単体）威力150" },
+  { name: "ファイア", category: "magic", desc: "火属性魔法（単体）威力130" },
+  { name: "ヒール", category: "heal", desc: "味方単体を回復（HP+150）" },
+  { name: "ガードブースト", category: "support", desc: "味方全体の防御力アップ" },
+  { name: "ソウルバースト", category: "special", desc: "全体攻撃＋自己強化" }
+];
+
+let selectedSkills = JSON.parse(localStorage.getItem("selected_skills")) || [];
+let favorites = JSON.parse(localStorage.getItem("fav_skills")) || [];
+
+function renderSkills(list = skills) {
+  const container = document.getElementById("skill-list");
+  container.innerHTML = "";
+  list.forEach(skill => {
+    const div = document.createElement("div");
+    div.className = "skill-item";
+    const favMark = favorites.includes(skill.name) ? "⭐" : "☆";
+    div.innerHTML = `
+      <span>${skill.name} (${skill.category})</span>
+      <span>${skill.desc}</span>
+      <span class="favorite" onclick="toggleFavorite('${skill.name}')">${favMark}</span>
+      <button onclick="addSkill('${skill.name}')">追加</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function filterSkills() {
+  const cat = document.getElementById("category").value;
+  const query = document.getElementById("search").value.trim();
+  const filtered = skills.filter(s => 
+    (cat === "all" || s.category === cat) &&
+    s.name.includes(query)
+  );
+  renderSkills(filtered);
+}
+
+function addSkill(name) {
+  if (selectedSkills.length >= 16) return alert("最大16スキルまでです！");
+  if (selectedSkills.includes(name)) return alert("すでに登録済みです！");
+  selectedSkills.push(name);
+  localStorage.setItem("selected_skills", JSON.stringify(selectedSkills));
+  renderSelected();
+}
+
+function renderSelected() {
+  const box = document.getElementById("selected-skills");
+  box.innerHTML = "";
+  selectedSkills.forEach((s, i) => {
+    const div = document.createElement("div");
+    div.className = "slot";
+    div.innerHTML = `${i+1}. ${s} <button onclick="removeSkill(${i})">削除</button>`;
+    box.appendChild(div);
+  });
+}
+
+function removeSkill(i) {
+  selectedSkills.splice(i, 1);
+  localStorage.setItem("selected_skills", JSON.stringify(selectedSkills));
+  renderSelected();
+}
+
+function toggleFavorite(name) {
+  const i = favorites.indexOf(name);
+  if (i === -1) favorites.push(name); else favorites.splice(i, 1);
+  localStorage.setItem("fav_skills", JSON.stringify(favorites));
+  filterSkills();
+}
+
+renderSkills();
+renderSelected();
+</script>
+</body>
+</html>
