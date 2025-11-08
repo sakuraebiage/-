@@ -1,28 +1,68 @@
-<header style="position: sticky; top: 0; z-index: 9999; background: #111; border-bottom: 1px solid #444;">
-  <h1 style="font-size: 1.3em; color: #8ae1ff; letter-spacing: 1px; margin: 0 10px;">星守戦線</h1>
-  <nav id="main-nav" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 10px;">
-    <a href="index.html">🏠 ホーム</a>
-    <a href="defense.html">🛡 防衛</a>
-    <a href="craft/craft.html">⚒ クラフト</a>
-    <a href="items/items.html">🎒 アイテム</a>
-    <a href="chat/chat.html">💬 チャット</a>
-    <a href="mypage.html">💪 訓練</a>
-    <a href="battle_setup.html">⚔ 戦闘設定</a>
-    <a href="shop.html">🏪 購買</a>
-    <a href="logout.html">🚪 ログアウト</a>
+<header class="main-header">
+  <h1>星守戦線</h1>
+
+  <nav class="main-nav">
+    <div class="tab-group">
+      <a href="../index.html">🏠 ホーム</a>
+      <a href="../defence/defence.html">🛡 防衛</a>
+      <a href="../setting/setting.html">⚔ 戦闘設定</a>
+      <a href="../traning/traning.html">💪 訓練</a>
+    </div>
+
+    <div class="tab-group">
+      <a href="../craft/craft.html">⚒ クラフト</a>
+      <a href="../items/items.html">🎒 アイテム</a>
+      <a href="../shop.html">🏪 購買</a>
+    </div>
+
+    <div class="tab-group">
+      <a href="../chat/chat.html">💬 チャット</a>
+      <a href="../logout.html">🚪 ログアウト</a>
+    </div>
   </nav>
 </header>
 
 <style>
-#main-nav a {
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  background: #111;
+  border-bottom: 1px solid #444;
+  padding: 8px 0;
+  text-align: center;
+}
+
+.main-header h1 {
+  font-size: 1.3em;
+  color: #8ae1ff;
+  margin: 0 0 6px 0;
+}
+
+.main-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tab-group {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tab-group a {
   color: #8ae1ff;
   text-decoration: none;
   font-weight: bold;
-  transition: color 0.3s, background 0.3s;
   padding: 6px 10px;
   border-radius: 6px;
+  transition: 0.3s;
 }
-#main-nav a:hover {
+
+.tab-group a:hover {
   color: #fff;
   background: rgba(138, 225, 255, 0.2);
   text-shadow: 0 0 5px #00eaff;
