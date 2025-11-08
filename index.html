@@ -13,6 +13,8 @@ body {
   flex-direction: column;
   align-items: center;
 }
+
+/* ヘッダー */
 header {
   display: flex;
   justify-content: space-between;
@@ -21,137 +23,95 @@ header {
   background: #111;
   border-bottom: 1px solid #444;
   width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
-header h1 { font-size: 1.3em; color: #8ae1ff; }
+
+header h1 {
+  font-size: 1.3em;
+  color: #8ae1ff;
+  letter-spacing: 1px;
+}
+
+/* ナビバー */
 nav a {
   color: #8ae1ff;
   margin-left: 12px;
   text-decoration: none;
   transition: 0.3s;
+  font-weight: bold;
 }
-nav a:hover { color: #fff; text-shadow: 0 0 5px #00eaff; }
+nav a:hover {
+  color: #fff;
+  text-shadow: 0 0 5px #00eaff;
+}
 
-#character-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
+main {
   padding: 20px;
   width: 90%;
-}
-
-.character-card {
-  background: #111;
-  border: 1px solid #555;
-  border-radius: 10px;
-  padding: 10px;
-  width: 200px;
-  text-align: center;
-  transition: transform 0.3s;
-}
-.character-card:hover {
-  transform: scale(1.05);
-  border-color: #8ae1ff;
-}
-.character-card img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #8ae1ff;
-}
-.character-name {
-  font-weight: bold;
-  color: #8ae1ff;
-  margin-top: 8px;
-}
-.character-comment {
-  font-size: 0.85em;
-  color: #bbb;
-  margin-top: 4px;
-}
-
-#newCharForm {
-  margin: 20px 0;
-}
-#newCharForm input {
-  padding: 5px;
-  font-size: 1em;
-}
-#newCharForm button {
-  padding: 5px 10px;
-  margin-left: 5px;
-  cursor: pointer;
-  background: #111;
-  color: #8ae1ff;
-  border: 1px solid #8ae1ff;
-}
-#newCharForm button:hover {
-  background: #8ae1ff;
-  color: #000;
-}
-
-#charList div {
-  margin-bottom: 8px;
-}
-#charList img {
-  vertical-align: middle;
-  border-radius: 50%;
-  margin: 0 5px;
+  max-width: 1000px;
 }
 </style>
 </head>
+
 <body>
-
 <header>
-  <h1>星守戦線 トップページ</h1>
-<nav>
-  <a href="../index.html">🏠 ホーム</a>
-  <a href="../defense/defense.html">🛡️ 防衛</a>
-  <a href="../craft/craft.html">⚒️ クラフト</a>
-  <a href="../items/items.html">🎒 アイテム</a>
-  <a href="../chat/chat.html">💬 チャット</a>
-  <a href="../mypage.html">💪 訓練</a>
-  <a href="../battle_setup.html">⚔ 戦闘設定</a>
-  <a href="../shop.html">🏪 購買</a>
-  <a href="../logout.html">🚪 ログアウト</a>
-</nav>
+  <h1>星守戦線</h1>
+  <nav id="main-nav">
+    <a href="index.html">🏠 ホーム</a>
+    <a href="defense/defense.html">🛡️ 防衛</a>
+    <a href="craft/craft.html">⚒️ クラフト</a>
+    <a href="items/items.html">🎒 アイテム</a>
+    <a href="chat/chat.html">💬 チャット</a>
+    <a href="mypage.html">💪 訓練</a>
+    <a href="battle_setup.html">⚔ 戦闘設定</a>
+    <a href="shop.html">🏪 購買</a>
+    <a href="logout.html">🚪 ログアウト</a>
+  </nav>
+</header>
 
+<main>
+  <h2>登録キャラクター一覧</h2>
+  <div id="character-list"></div>
 
-<h2>登録キャラクター一覧</h2>
-<div id="character-list"></div>
-
-<h2>キャラ管理</h2>
-<!-- 新規キャラ作成フォーム -->
-<div id="newCharForm">
-  <input type="text" id="newCharName" placeholder="キャラ名">
-  <button onclick="addNewChar()">追加</button>
-</div>
-
-<!-- 登録済みキャラ一覧 -->
-<div id="charList"></div>
+  <h2>キャラ管理</h2>
+  <div id="newCharForm">
+    <input type="text" id="newCharName" placeholder="キャラ名">
+    <button onclick="addNewChar()">追加</button>
+  </div>
+  <div id="charList"></div>
+</main>
 
 <script>
-// ユーザーデータ取得
+// ======== フォルダ階層に応じたリンク修正 ========
+const isSubPage = window.location.pathname.split("/").length > 2;
+if (isSubPage) {
+  document.querySelectorAll("#main-nav a").forEach(a => {
+    const href = a.getAttribute("href");
+    if (!href.startsWith("../")) a.setAttribute("href", "../" + href);
+  });
+}
+
+// ======== キャラクター管理ロジック ========
 let userData = JSON.parse(localStorage.getItem("user_chars")) || { chars:[], selectedCharIndex:0 };
 
-// キャラ一覧描画
 function renderCharList() {
   const list = document.getElementById("charList");
   list.innerHTML = "";
   userData.chars.forEach((char, i) => {
     const div = document.createElement("div");
+    div.style.marginBottom="8px";
     const selectedMark = userData.selectedCharIndex===i ? "🌟" : "";
     div.innerHTML = `
       ${selectedMark} <strong>${char.name}</strong>
-      <img src="${char.icon||'https://placehold.co/32x32?text=No+Icon'}" width="32" height="32">
+      <img src="${char.icon||'https://placehold.co/32x32?text=?'}" width="32" height="32">
       <button onclick="selectChar(${i})">切替</button>
     `;
     list.appendChild(div);
   });
 }
 
-// 新規キャラ追加
 function addNewChar() {
   const name = document.getElementById("newCharName").value.trim();
   if(!name) return alert("名前を入力してください！");
@@ -161,57 +121,58 @@ function addNewChar() {
   localStorage.setItem("user_chars", JSON.stringify(userData));
   renderCharList();
   document.getElementById("newCharName").value="";
-  renderCharacterCards();
 }
 
-// キャラ切替
 function selectChar(index){
   userData.selectedCharIndex=index;
   localStorage.setItem("user_chars", JSON.stringify(userData));
   renderCharList();
-  currentChar = userData.chars[index];
-  updateAllPages?.();
 }
 
-// トップページ用キャラクターカード描画
-function renderCharacterCards() {
-  const list = document.getElementById("character-list");
-  list.innerHTML = "";
-  if(userData.chars.length === 0){
-    list.innerHTML = "<p>まだキャラクターが登録されていません。</p>";
-    return;
-  }
-  userData.chars.forEach(c => {
+renderCharList();
+
+// ======== 登録済キャラ一覧表示 ========
+const characters = userData.chars;
+const list = document.getElementById("character-list");
+if (characters.length === 0) {
+  list.innerHTML = "<p>まだキャラクターが登録されていません。</p>";
+} else {
+  characters.forEach(c => {
     const card = document.createElement("div");
-    card.classList.add("character-card");
+    card.style.background="#111";
+    card.style.border="1px solid #555";
+    card.style.borderRadius="10px";
+    card.style.padding="10px";
+    card.style.width="200px";
+    card.style.textAlign="center";
+    card.style.display="inline-block";
+    card.style.margin="10px";
+    card.style.cursor="pointer";
 
     const img = document.createElement("img");
     img.src = c.icon || "https://placehold.co/120x120?text=No+Icon";
+    img.style.width="120px";
+    img.style.height="120px";
+    img.style.borderRadius="50%";
+    img.style.border="2px solid #8ae1ff";
+    img.style.objectFit="cover";
 
     const name = document.createElement("div");
-    name.classList.add("character-name");
     name.textContent = c.name;
-
-    const comment = document.createElement("div");
-    comment.classList.add("character-comment");
-    comment.textContent = c.comment || "一言コメントなし";
+    name.style.fontWeight="bold";
+    name.style.color="#8ae1ff";
+    name.style.marginTop="6px";
 
     card.appendChild(img);
     card.appendChild(name);
-    card.appendChild(comment);
-
     card.addEventListener("click", () => {
-      // マイページに飛ばす場合
-      window.location.href = "mypage.html?name=" + encodeURIComponent(c.name);
+      // プロフィールページへ
+      window.location.href = "mypage.html?char=" + encodeURIComponent(c.name);
     });
 
     list.appendChild(card);
   });
 }
-
-// 初期描画
-renderCharList();
-renderCharacterCards();
 </script>
 
 </body>
