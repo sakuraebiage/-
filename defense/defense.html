@@ -11,6 +11,7 @@ body {
   color:#e0e0e0;
   display:flex;
   flex-direction:column;
+  min-height:100vh;
 }
 header {
   display:flex;
@@ -21,7 +22,12 @@ header {
   border-bottom:1px solid #444;
 }
 header h1 { font-size:1.2em; color:#8ae1ff; }
-nav a { color:#8ae1ff; margin-left:12px; text-decoration:none; transition:0.3s; }
+nav a {
+  color:#8ae1ff;
+  margin-left:12px;
+  text-decoration:none;
+  transition:0.3s;
+}
 nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 
 #announcement {
@@ -36,7 +42,7 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 }
 .scroll-text { display:inline-block; }
 
-#main-container { display:flex; flex:1; }
+#main-container { display:flex; flex:1; min-height:0; }
 #map {
   position:relative;
   flex:1;
@@ -50,7 +56,7 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
   border-left:1px solid #555;
   padding:10px;
   overflow-y:auto;
-  max-height:100%;
+  flex-shrink:0;
 }
 .status-entry { border-bottom:1px solid #333; padding:6px 0; font-size:0.85em; }
 
@@ -113,17 +119,7 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 <body>
 <header>
   <h1>防衛戦況モニタ</h1>
-<nav>
-  <a href="../index.html">🏠 ホーム</a>
-  <a href="../craft/craft.html">⚒️ クラフト</a>
-  <a href="../items/items.html">🎒 アイテム</a>
-  <a href="../chat/chat.html">💬 チャット</a>
-  <a href="../mypage.html">💪 訓練</a>
-  <a href="../battle_setup.html">⚔ 戦闘設定</a>
-  <a href="../shop.html">🏪 購買</a>
-  <a href="../logout.html">🚪 ログアウト</a>
-</nav>
-
+  <nav id="nav-links"></nav>
 </header>
 
 <div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
@@ -148,14 +144,30 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 </div>
 
 <script>
+// --- ナビリンク自動補正 ---
+const navData = [
+  ["ホーム","index.html"],["防衛","defense/defense.html"],["クラフト","craft/craft.html"],
+  ["アイテム","items/items.html"],["チャット","chat/chat.html"],["訓練","mypage.html"],
+  ["戦闘設定","battle_setup.html"],["購買","shop.html"],["ログアウト","logout.html"]
+];
+const navContainer = document.getElementById("nav-links");
+navData.forEach(([name,href])=>{
+  const a=document.createElement("a");
+  a.href=href;
+  a.textContent=name==="防衛"?"🛡️ 防衛":name==="ホーム"?"🏠 ホーム":name;
+  navContainer.appendChild(a);
+});
+
+// --- キャラ情報 ---
+let currentChar = JSON.parse(localStorage.getItem("currentChar")) || { name:"未設定", recentActions:[] };
+
+// --- マップと拠点 ---
 const map = document.getElementById("map");
 const statusPanel = document.getElementById("status-panel");
 const announcementText = document.getElementById("announcementText");
 const modalBg = document.getElementById("modalBg");
 const modalTitle = document.getElementById("modalTitle");
 const modalBody = document.getElementById("modalBody");
-
-let currentChar = JSON.parse(localStorage.getItem("currentChar")) || { name:"未設定", recentActions:[] };
 
 const bases = [];
 const numBases = 20;
@@ -180,8 +192,7 @@ for(let i=0;i<numBases;i++){
   map.appendChild(base);
   bases.push(base);
 
-  // クリックでモーダル表示
-  base.addEventListener("click", ()=>{
+  base.addEventListener("click",()=>{
     modalBg.style.display="flex";
     modalTitle.textContent = base.dataset.id;
     modalBody.innerHTML = `<p>選択した拠点: ${base.dataset.id}</p>`;
@@ -196,7 +207,7 @@ modalBg.addEventListener("click",(e)=>{ if(e.target===modalBg) closeModal(); });
 // 円陣配置
 function positionBases(){
   const centerX=map.offsetWidth/2;
-  const centerY=map.offsetHeight/2 + 250;
+  const centerY=map.offsetHeight/2;
   bases.forEach((base,i)=>{
     if(i===0){ base.style.left=`${centerX-27.5}px`; base.style.top=`${centerY-27.5}px`; return; }
     const angle=(i/19)*2*Math.PI;
@@ -209,22 +220,20 @@ function positionBases(){
 positionBases();
 window.addEventListener("resize",positionBases);
 
-// 拠点状態更新
+// ステータス更新
 function updateBases(){
   bases.forEach(base=>{
-    if(base.dataset.id==="本部") return;
-    const hp=Math.max(0, base.dataset.hp - Math.random()*5);
-    base.dataset.hp=hp.toFixed(0);
-    base.dataset.enemies=Math.max(0, base.dataset.enemies - Math.random()*5).toFixed(0);
-    base.dataset.resource=(parseInt(base.dataset.resource)+Math.random()*30-15).toFixed(0);
-    const hpFill=base.querySelector(".hp-fill");
-    hpFill.style.width=`${hp}%`;
-    hpFill.style.background = hp>60?"#00ff9d": hp>30?"#ffeb3b":"#ff4b4b";
+    if(base.dataset.id!=="本部"){
+      let hp=Math.max(0, base.dataset.hp - Math.random()*5);
+      base.dataset.hp=hp.toFixed(0);
+      base.dataset.enemies=Math.max(0, base.dataset.enemies - Math.random()*5).toFixed(0);
+      base.dataset.resource=(parseInt(base.dataset.resource)+Math.random()*30-15).toFixed(0);
+      base.querySelector(".hp-fill").style.width=`${hp}%`;
+      base.querySelector(".hp-fill").style.background = hp>60?"#00ff9d": hp>30?"#ffeb3b":"#ff4b4b";
+    }
   });
   updateStatusPanel();
 }
-
-// ステータスパネル更新
 function updateStatusPanel(){
   statusPanel.innerHTML="<h3>拠点ステータス</h3>";
   bases.forEach(base=>{
@@ -269,7 +278,7 @@ function scrollAnnouncement(){
   });
 }
 
-// 行動記録追加
+// 行動記録
 function addAction(action){
   const timestamp = new Date().toLocaleTimeString();
   currentChar.recentActions.unshift(`[${timestamp}] ${action}`);
@@ -277,7 +286,7 @@ function addAction(action){
   localStorage.setItem("currentChar", JSON.stringify(currentChar));
 }
 
-// ボタンイベント
+// モーダルボタン
 let selectedBase = null;
 document.getElementById("combatBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で戦闘行動`); closeModal(); } };
 document.getElementById("exploreBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で探索行動`); closeModal(); } };
