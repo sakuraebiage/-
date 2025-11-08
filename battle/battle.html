@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>4v4戦闘プロトタイプ</title>
+<style>
+body { background:#000; color:#e0e0e0; font-family: monospace; margin:0; padding:0; }
+#battle-container { display:flex; justify-content:space-between; padding:20px; }
+.team { display:flex; flex-direction:column; gap:10px; }
+.character { display:flex; align-items:center; gap:5px; transition: top 0.5s; position: relative; }
+.char-icon { width:40px; height:40px; border-radius:50%; border:2px solid #8ae1ff; display:flex; justify-content:center; align-items:center; background:#111; color:#8ae1ff; font-weight:bold; }
+.hp-bar { width:100px; height:8px; background:#222; border:1px solid #444; position:relative; }
+.hp-fill { height:100%; background:#0f0; width:100%; transition: width 0.3s; }
+.sp-bar { width:100px; height:5px; background:#222; border:1px solid #444; position:relative; margin-top:2px; }
+.sp-fill { height:100%; background:#00f; width:100%; transition: width 0.3s; }
+#log { background:#111; border-top:1px solid #444; padding:10px; height:120px; overflow-y:auto; font-size:0.85em; }
+.arrow { position:absolute; width:2px; background:#fff; }
+</style>
+</head>
+<body>
+
+<div id="battle-container">
+  <div class="team" id="allies"></div>
+  <div class="team" id="enemies"></div>
+</div>
+<div id="log"></div>
+<button onclick="nextTurn()">次のターン</button>
+
+<script>
+// ======== 初期キャラデータ ========
+const alliesData = [
+  {name:'A1', hp:100, sp:50, mp:30, speed:10},
+  {name:'A2', hp:100, sp:50, mp:30, speed:15},
+  {name:'A3', hp:100, sp:50, mp:30, speed:12},
+  {name:'A4', hp:100, sp:50, mp:30, speed:8}
+];
+
+const enemiesData = [
+  {name:'E1', hp:100, sp:50, mp:30, speed:9},
+  {name:'E2', hp:100, sp:50, mp:30, speed:11},
+  {name:'E3', hp:100, sp:50, mp:30, speed:14},
+  {name:'E4', hp:100, sp:50, mp:30, speed:10}
+];
+
+const alliesEl = document.getElementById('allies');
+const enemiesEl = document.getElementById('enemies');
+const logEl = document.getElementById('log');
+
+function createCharEl(char){
+  const div = document.createElement('div');
+  div.className='character';
+  div.dataset.name=char.name;
+  const icon = document.createElement('div'); icon.className='char-icon'; icon.textContent=char.name;
+  const hpBar = document.createElement('div'); hpBar.className='hp-bar';
+  const hpFill = document.createElement('div'); hpFill.className='hp-fill'; hpBar.appendChild(hpFill);
+  const spBar = document.createElement('div'); spBar.className='sp-bar';
+  const spFill = document.createElement('div'); spFill.className='sp-fill'; spBar.appendChild(spFill);
+  div.appendChild(icon); div.appendChild(hpBar); div.appendChild(spBar);
+  return div;
+}
+
+let allies = alliesData.map(c=>({ ...c, el:createCharEl(c)}));
+let enemies = enemiesData.map(c=>({ ...c, el:createCharEl(c)}));
+allies.forEach(c=>alliesEl.appendChild(c.el));
+enemies.forEach(c=>enemiesEl.appendChild(c.el));
+
+let turnIndex = 0;
+
+// ======== ターン処理 ========
+function nextTurn(){
+  const allChars = [...allies,...enemies];
+  // 速度順に並べ替え
+  allChars.sort((a,b)=>b.speed - a.speed);
+
+  const actor = allChars[turnIndex % allChars.length];
+  const targetTeam = allies.includes(actor) ? enemies : allies;
+  const target = targetTeam[Math.floor(Math.random()*targetTeam.length)];
+
+  // ランダムで攻撃か回復
+  const actionType = Math.random() < 0.8 ? 'attack' : 'heal';
+  if(actionType==='attack'){
+    const damage = Math.floor(Math.random()*20)+5;
+    target.hp = Math.max(0,target.hp-damage);
+    log(`${actor.name}→${target.name} : ${damage}ダメージ`);
+    updateHP(target);
+  } else {
+    const heal = Math.floor(Math.random()*15)+5;
+    target.hp = Math.min(100,target.hp+heal);
+    log(`${actor.name}→${target.name} : ${heal}回復`);
+    updateHP(target);
+  }
+
+  turnIndex++;
+  updatePositions(allChars);
+}
+
+// ======== HP/SP 更新 ========
+function updateHP(char){
+  char.el.querySelector('.hp-fill').style.width = char.hp+'%';
+}
+
+// ======== 行動ログ ========
+function log(text){
+  const p = document.createElement('div'); p.textContent=text;
+  logEl.appendChild(p);
+  logEl.scrollTop=logEl.scrollHeight;
+}
+
+// ======== 行動順で上下位置変更 ========
+function updatePositions(allChars){
+  allChars.forEach((c,i)=>{
+    c.el.style.top=(i*50)+'px';
+  });
+}
+</script>
+</body>
+</html>
