@@ -1,193 +1,141 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>星守戦線 - トップページ</title>
-<style>
-body {
-  margin: 0;
-  font-family: "Consolas", "Roboto Mono", monospace;
-  background: #000;
-  color: #e0e0e0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  <meta charset="UTF-8">
+  <title>星守戦線 - トップページ</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Consolas", "Roboto Mono", monospace;
+      background: #000;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-/* ヘッダー */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background: #111;
-  border-bottom: 1px solid #444;
-  width: 100%;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-header h1 {
-  font-size: 1.3em;
-  color: #8ae1ff;
-  letter-spacing: 1px;
-}
+    main {
+      padding: 20px;
+      width: 90%;
+      max-width: 1000px;
+    }
 
-/* ナビバー */
-nav a {
-  color: #8ae1ff;
-  margin-left: 12px;
-  text-decoration: none;
-  transition: 0.3s;
-  font-weight: bold;
-}
-nav a:hover {
-  color: #fff;
-  text-shadow: 0 0 5px #00eaff;
-}
-
-main {
-  padding: 20px;
-  width: 90%;
-  max-width: 1000px;
-}
-
-/* キャラクターカード */
-.character-card {
-  background: #111;
-  border: 1px solid #555;
-  border-radius: 10px;
-  padding: 10px;
-  width: 200px;
-  text-align: center;
-  display: inline-block;
-  margin: 10px;
-  cursor: pointer;
-}
-.character-card img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  border: 2px solid #8ae1ff;
-  object-fit: cover;
-}
-.character-card .character-name {
-  font-weight: bold;
-  color: #8ae1ff;
-  margin-top: 6px;
-}
-</style>
+    /* キャラクターカード */
+    .character-card {
+      background: #111;
+      border: 1px solid #555;
+      border-radius: 10px;
+      padding: 10px;
+      width: 200px;
+      text-align: center;
+      display: inline-block;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .character-card img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 2px solid #8ae1ff;
+      object-fit: cover;
+    }
+    .character-card .character-name {
+      font-weight: bold;
+      color: #8ae1ff;
+      margin-top: 6px;
+    }
+  </style>
 </head>
 
 <body>
-<header>
-  <h1>星守戦線</h1>
-  <nav id="main-nav">
-    <a href="../index.html">🏠 ホーム</a>
-    <a href="../defense.html"> 防衛</a>
-    <a href="../craft/craft.html">⚒ クラフト</a>
-    <a href="../items/items.html">🎒 アイテム</a>
-    <a href="../chat/chat.html">💬 チャット</a>
-    <a href="../mypage.html">💪 訓練</a>
-    <a href="../battle_setup.html">⚔ 戦闘設定</a>
-    <a href="../shop.html">🏪 購買</a>
-    <a href="../logout.html">🚪 ログアウト</a>
-  </nav>
-</header>
+  <!-- ✅ 共通ヘッダーを読み込む -->
+  <div id="header-container"></div>
 
-<main>
-  <h2>登録キャラクター一覧</h2>
-  <div id="character-list"></div>
+  <main>
+    <h2>登録キャラクター一覧</h2>
+    <div id="character-list"></div>
 
-  <h2>キャラ管理</h2>
-  <div id="newCharForm">
-    <input type="text" id="newCharName" placeholder="キャラ名">
-    <button onclick="addNewChar()">追加</button>
-  </div>
-  <div id="charList"></div>
-</main>
+    <h2>キャラ管理</h2>
+    <div id="newCharForm">
+      <input type="text" id="newCharName" placeholder="キャラ名">
+      <button onclick="addNewChar()">追加</button>
+    </div>
+    <div id="charList"></div>
+  </main>
 
-<script>
-// ======== フォルダ階層に応じたリンク修正 ========
-const pathParts = window.location.pathname.split("/").filter(p => p);
-const isSubPage = pathParts.length > 1; // ルート直下なら false
-const navLinks = document.querySelectorAll("#main-nav a");
-if (isSubPage) {
-  navLinks.forEach(a => {
-    const href = a.getAttribute("href");
-    if (!href.startsWith("../") && !href.startsWith("http")) {
-      a.setAttribute("href", "../" + href);
+  <script>
+    // ✅ 共通ヘッダー読み込み
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("header-container").innerHTML = html;
+      });
+
+    // ======== キャラクター管理ロジック ========
+    let userData = JSON.parse(localStorage.getItem("user_chars")) || { chars: [], selectedCharIndex: 0 };
+
+    function renderCharList() {
+      const list = document.getElementById("charList");
+      list.innerHTML = "";
+      userData.chars.forEach((char, i) => {
+        const div = document.createElement("div");
+        div.style.marginBottom = "8px";
+        const selectedMark = userData.selectedCharIndex === i ? "🌟" : "";
+        div.innerHTML = `
+          ${selectedMark} <strong>${char.name}</strong>
+          <img src="${char.icon || 'https://placehold.co/32x32?text=?'}" width="32" height="32">
+          <button onclick="selectChar(${i})">切替</button>
+        `;
+        list.appendChild(div);
+      });
     }
-  });
-}
 
-// ======== キャラクター管理ロジック ========
-let userData = JSON.parse(localStorage.getItem("user_chars")) || { chars:[], selectedCharIndex:0 };
+    function addNewChar() {
+      const name = document.getElementById("newCharName").value.trim();
+      if (!name) return alert("名前を入力してください！");
+      const newChar = { name, icon: "", stats: {}, skills: [], points: 0 };
+      userData.chars.push(newChar);
+      userData.selectedCharIndex = userData.chars.length - 1;
+      localStorage.setItem("user_chars", JSON.stringify(userData));
+      renderCharList();
+      document.getElementById("newCharName").value = "";
+    }
 
-function renderCharList() {
-  const list = document.getElementById("charList");
-  list.innerHTML = "";
-  userData.chars.forEach((char, i) => {
-    const div = document.createElement("div");
-    div.style.marginBottom="8px";
-    const selectedMark = userData.selectedCharIndex===i ? "🌟" : "";
-    div.innerHTML = `
-      ${selectedMark} <strong>${char.name}</strong>
-      <img src="${char.icon||'https://placehold.co/32x32?text=?'}" width="32" height="32">
-      <button onclick="selectChar(${i})">切替</button>
-    `;
-    list.appendChild(div);
-  });
-}
+    function selectChar(index) {
+      userData.selectedCharIndex = index;
+      localStorage.setItem("user_chars", JSON.stringify(userData));
+      renderCharList();
+    }
 
-function addNewChar() {
-  const name = document.getElementById("newCharName").value.trim();
-  if(!name) return alert("名前を入力してください！");
-  const newChar = { name, icon:"", stats:{}, skills:[], points:0 };
-  userData.chars.push(newChar);
-  userData.selectedCharIndex = userData.chars.length-1;
-  localStorage.setItem("user_chars", JSON.stringify(userData));
-  renderCharList();
-  document.getElementById("newCharName").value="";
-}
+    renderCharList();
 
-function selectChar(index){
-  userData.selectedCharIndex=index;
-  localStorage.setItem("user_chars", JSON.stringify(userData));
-  renderCharList();
-}
+    // ======== 登録済キャラ一覧表示 ========
+    const characters = userData.chars;
+    const list = document.getElementById("character-list");
+    if (characters.length === 0) {
+      list.innerHTML = "<p>まだキャラクターが登録されていません。</p>";
+    } else {
+      characters.forEach(c => {
+        const card = document.createElement("div");
+        card.classList.add("character-card");
 
-renderCharList();
+        const img = document.createElement("img");
+        img.src = c.icon || "https://placehold.co/120x120?text=No+Icon";
 
-// ======== 登録済キャラ一覧表示 ========
-const characters = userData.chars;
-const list = document.getElementById("character-list");
-if (characters.length === 0) {
-  list.innerHTML = "<p>まだキャラクターが登録されていません。</p>";
-} else {
-  characters.forEach(c => {
-    const card = document.createElement("div");
-    card.classList.add("character-card");
+        const name = document.createElement("div");
+        name.textContent = c.name;
+        name.classList.add("character-name");
 
-    const img = document.createElement("img");
-    img.src = c.icon || "https://placehold.co/120x120?text=No+Icon";
+        card.appendChild(img);
+        card.appendChild(name);
 
-    const name = document.createElement("div");
-    name.textContent = c.name;
-    name.classList.add("character-name");
+        card.addEventListener("click", () => {
+          window.location.href = "mypage.html?char=" + encodeURIComponent(c.name);
+        });
 
-    card.appendChild(img);
-    card.appendChild(name);
-
-    card.addEventListener("click", () => {
-      // マイページでプロフィール表示
-      const prefix = isSubPage ? "../" : "";
-      window.location.href = prefix + "mypage.html?char=" + encodeURIComponent(c.name);
-    });
-
-    list.appendChild(card);
-  });
-}
-</script>
+        list.appendChild(card);
+      });
+    }
+  </script>
 </body>
 </html>
