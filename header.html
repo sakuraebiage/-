@@ -1,36 +1,42 @@
-<header>
+<header id="navbar">
   <h1>星守戦線</h1>
-  <nav id="main-nav">
-    <a href="/index.html">🏠 ホーム</a>
-    <a href="/craft/craft.html">⚒ クラフト</a>
-    <a href="/items/items.html">🎒 アイテム</a>
-    <a href="/chat/chat.html">💬 チャット</a>
-    <a href="/mypage.html">💪 訓練</a>
-    <a href="/battle_setup.html">⚔ 戦闘設定</a>
-    <a href="/shop.html">🏪 購買</a>
-    <a href="/logout.html">🚪 ログアウト</a>
+  <nav>
+    <a href="./index.html">🏠 ホーム</a>
+    <a href="./craft/craft.html">⚒ クラフト</a>
+    <a href="./items/items.html">🎒 アイテム</a>
+    <a href="./chat/chat.html">💬 チャット</a>
+    <a href="./mypage.html">💪 訓練</a>
+    <a href="./battle_setup.html">⚔ 戦闘設定</a>
+    <a href="./shop.html">🏪 購買</a>
+    <a href="./logout.html">🚪 ログアウト</a>
   </nav>
 </header>
-
 
 <style>
 #navbar {
   display: flex;
   justify-content: center;
+  align-items: center;
   background: #263238;
-  padding: 10px 0;
+  padding: 10px 20px;
   position: sticky;
   top: 0;
   z-index: 1000;
+  flex-wrap: wrap;
 }
-#navbar a {
+#navbar h1 {
+  color: #8ae1ff;
+  margin-right: 20px;
+  font-size: 1.3em;
+}
+#navbar nav a {
   color: #fff;
   text-decoration: none;
-  margin: 0 15px;
+  margin: 0 10px;
   font-weight: bold;
   transition: color 0.2s;
 }
-#navbar a:hover {
+#navbar nav a:hover {
   color: #ffca28;
 }
 </style>
