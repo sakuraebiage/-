@@ -1,42 +1,69 @@
-<header id="navbar">
+<!-- 📁 header.html （全ページで共通） -->
+<header>
   <h1>星守戦線</h1>
-  <nav>
-    <a href="./index.html">🏠 ホーム</a>
-    <a href="./craft/craft.html">⚒ クラフト</a>
-    <a href="./items/items.html">🎒 アイテム</a>
-    <a href="./chat/chat.html">💬 チャット</a>
-    <a href="./mypage.html">💪 訓練</a>
-    <a href="./battle_setup.html">⚔ 戦闘設定</a>
-    <a href="./shop.html">🏪 購買</a>
-    <a href="./logout.html">🚪 ログアウト</a>
+  <nav id="main-nav">
+    <a data-target="index">🏠 ホーム</a>
+    <a data-target="craft">⚒ クラフト</a>
+    <a data-target="items">🎒 アイテム</a>
+    <a data-target="chat">💬 チャット</a>
+    <a data-target="mypage">💪 訓練</a>
+    <a data-target="battle">⚔ 戦闘設定</a>
+    <a data-target="shop">🏪 購買</a>
+    <a data-target="logout">🚪 ログアウト</a>
   </nav>
 </header>
 
 <style>
-#navbar {
+header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  background: #263238;
   padding: 10px 20px;
+  background: #111;
+  border-bottom: 1px solid #444;
+  width: 100%;
   position: sticky;
   top: 0;
-  z-index: 1000;
-  flex-wrap: wrap;
+  z-index: 10;
 }
-#navbar h1 {
-  color: #8ae1ff;
-  margin-right: 20px;
+header h1 {
   font-size: 1.3em;
+  color: #8ae1ff;
+  letter-spacing: 1px;
 }
-#navbar nav a {
-  color: #fff;
+#main-nav a {
+  color: #8ae1ff;
+  margin-left: 12px;
   text-decoration: none;
-  margin: 0 10px;
+  transition: 0.3s;
   font-weight: bold;
-  transition: color 0.2s;
 }
-#navbar nav a:hover {
-  color: #ffca28;
+#main-nav a:hover {
+  color: #fff;
+  text-shadow: 0 0 5px #00eaff;
 }
 </style>
+
+<script>
+(() => {
+  // ルート（例: /index.html） or サブフォルダ（例: /craft/craft.html）を判定
+  const depth = window.location.pathname.split("/").length - 2;
+  const prefix = depth > 0 ? "../".repeat(depth) : "";
+
+  const links = {
+    index: prefix + "index.html",
+    craft: prefix + "craft/craft.html",
+    items: prefix + "items/items.html",
+    chat: prefix + "chat/chat.html",
+    mypage: prefix + "mypage.html",
+    battle: prefix + "battle_setup.html",
+    shop: prefix + "shop.html",
+    logout: prefix + "logout.html"
+  };
+
+  document.querySelectorAll("#main-nav a").forEach(a => {
+    const key = a.getAttribute("data-target");
+    if (key && links[key]) a.setAttribute("href", links[key]);
+  });
+})();
+</script>
