@@ -1,1 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>星守戦線 - クラフト</title>
+</head>
+<body>
+
+<div id="header-container"></div>
+
+<main>
+  <h2>クラフト画面</h2>
+  <p>素材を組み合わせて新しいアイテムを作成できます。</p>
+</main>
+
+<script>
+fetch("../header.html") // ← サブフォルダから1つ上の header.html を参照
+  .then(res => res.text())
+  .then(html => document.getElementById("header-container").innerHTML = html);
+</script>
+
+</body>
+</html>
 
