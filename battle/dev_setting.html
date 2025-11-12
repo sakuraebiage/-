@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>開発者用ステータス編集 - 星守戦線</title>
+<style>
+body {
+  font-family: "Consolas", "Roboto Mono", monospace;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #900;
+  color: #fff;
+  padding: 15px;
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #111;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255,0,0,0.4);
+}
+
+.character {
+  border-bottom: 1px solid #333;
+  padding: 15px 0;
+}
+
+.character:last-child {
+  border-bottom: none;
+}
+
+h2 {
+  color: #ff6b6b;
+  font-size: 20px;
+}
+
+label {
+  display: inline-block;
+  width: 100px;
+}
+
+input, select {
+  background: #222;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+button {
+  background: #ff6b6b;
+  border: none;
+  padding: 8px 15px;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #ff8787;
+}
+
+.save-status {
+  text-align: right;
+  color: #8aff4b;
+  font-size: 13px;
+  margin-top: 5px;
+}
+</style>
+</head>
+<body>
+
+<header>⚙ 開発者専用：NPC ステータス編集画面</header>
+
+<div class="container" id="dev-container"></div>
+
+<div style="text-align:center; margin-top:20px;">
+  <button onclick="saveAll()">💾 全データ保存</button>
+  <button onclick="window.location.href='battle_setting.html'">⬅ 戻る</button>
+</div>
+
+<script>
+// ===== NPCリスト =====
+const npcList = [
+  "十束静海","萩月恵佳","萩月宝楽","九条瑚白","萩月アオイ",
+  "月詠","ユリシス","萩月神奈","萩月要","セイ",
+  "斎慧斗","ラケル","九条黒斗","四葉奏","四葉愛",
+  "十束穂珠","蒼翠","ルミナ","くぅーん様","しろ"
+];
+
+// ===== 保存データ読み込み =====
+let npcData = JSON.parse(localStorage.getItem("npcData")) || {};
+
+// ===== 初期化 =====
+function createEditor() {
+  const container = document.getElementById("dev-container");
+  container.innerHTML = "";
+  npcList.forEach(name => {
+    const data = npcData[name] || {
+      hp: 1000, sp: 500, mp: 300,
+      attack: 100, defense: 80, speed: 50,
+      skill1: "", skill2: "", skill3: "", skill4: ""
+    };
+    const div = document.createElement("div");
+    div.className = "character";
+    div.innerHTML = `
+      <h2>${name}</h2>
+      <label>HP:</label> <input type="number" id="${name}_hp" value="${data.hp}"><br>
+      <label>SP:</label> <input type="number" id="${name}_sp" value="${data.sp}"><br>
+      <label>MP:</label> <input type="number" id="${name}_mp" value="${data.mp}"><br>
+      <label>攻撃:</label> <input type="number" id="${name}_atk" value="${data.attack}"><br>
+      <label>防御:</label> <input type="number" id="${name}_def" value="${data.defense}"><br>
+      <label>速度:</label> <input type="number" id="${name}_spd" value="${data.speed}"><br>
+      <label>スキル1:</label> <input id="${name}_skill1" value="${data.skill1}"><br>
+      <label>スキル2:</label> <input id="${name}_skill2" value="${data.skill2}"><br>
+      <label>スキル3:</label> <input id="${name}_skill3" value="${data.skill3}"><br>
+      <label>スキル4:</label> <input id="${name}_skill4" value="${data.skill4}"><br>
+      <button onclick="saveCharacter('${name}')">💾 このキャラを保存</button>
+      <div class="save-status" id="${name}_status"></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ===== キャラ単体保存 =====
+function saveCharacter(name) {
+  npcData[name] = {
+    hp: Number(document.getElementById(`${name}_hp`).value),
+    sp: Number(document.getElementById(`${name}_sp`).value),
+    mp: Number(document.getElementById(`${name}_mp`).value),
+    attack: Number(document.getElementById(`${name}_atk`).value),
+    defense: Number(document.getElementById(`${name}_def`).value),
+    speed: Number(document.getElementById(`${name}_spd`).value),
+    skill1: document.getElementById(`${name}_skill1`).value,
+    skill2: document.getElementById(`${name}_skill2`).value,
+    skill3: document.getElementById(`${name}_skill3`).value,
+    skill4: document.getElementById(`${name}_skill4`).value
+  };
+  localStorage.setItem("npcData", JSON.stringify(npcData));
+  document.getElementById(`${name}_status`).textContent = "✅ 保存しました";
+  setTimeout(() => document.getElementById(`${name}_status`).textContent = "", 2000);
+}
+
+// ===== 全体保存 =====
+function saveAll() {
+  npcList.forEach(n => saveCharacter(n));
+  alert("全キャラのデータを保存しました！");
+}
+
+createEditor();
+</script>
+</body>
+</html>
