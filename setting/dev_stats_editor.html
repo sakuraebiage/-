@@ -2,101 +2,51 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ステータス編集（開発用）</title>
-  <style>
-    body {
-      background: #121212;
-      color: #fff;
-      font-family: "Segoe UI", sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 1.4em;
-      border-bottom: 2px solid #444;
-      margin-bottom: 10px;
-    }
-    .char-card {
-      border: 1px solid #555;
-      border-radius: 10px;
-      padding: 10px;
-      margin-bottom: 15px;
-      background: #1e1e1e;
-    }
-    label {
-      display: inline-block;
-      width: 80px;
-    }
-    input {
-      width: 80px;
-      margin-right: 10px;
-      background: #222;
-      color: #fff;
-      border: 1px solid #444;
-      border-radius: 5px;
-      padding: 2px 5px;
-    }
-    button {
-      background: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 5px 10px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #66bb6a;
-    }
-  </style>
+  <title>開発者メニュー</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
 
-  <h1>ステータス編集（開発者用）</h1>
+  <h1 class="text-3xl font-bold mb-6">⚙️ 開発者メニュー</h1>
 
-  <div id="characterContainer"></div>
+  <p class="mb-4">ここから各開発用画面にアクセスできます。</p>
 
-  <button id="saveButton">💾 保存する</button>
+  <div class="space-y-2">
+    <a href="dev_stats_editor.html" 
+       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+       🧩 ステータス編集画面を開く
+    </a>
 
-  <script>
-    const characters = [
-      "十束静海", "萩月恵佳", "萩月宝楽", "九条瑚白", "萩月アオイ", "月詠",
-      "ユリシス", "萩月神奈", "萩月要", "セイ", "斎慧斗", "ラケル", "九条黒斗",
-      "四葉奏", "四葉愛", "十束穂珠", "蒼翠", "ルミナ", "くぅーん様", "しろ"
-    ];
+    <a href="dev_battle_settings.html" 
+       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+       ⚔ 戦闘設定画面を開く
+    </a>
 
-    const container = document.getElementById("characterContainer");
+    <a href="dev_skills_editor.html" 
+       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+       ✨ スキル一覧編集
+    </a>
 
-    characters.forEach(name => {
-      const div = document.createElement("div");
-      div.classList.add("char-card");
-      div.innerHTML = `
-        <h2>${name}</h2>
-        <label>HP</label><input type="number" id="${name}-hp" value="100"><br>
-        <label>MP</label><input type="number" id="${name}-mp" value="50"><br>
-        <label>SP</label><input type="number" id="${name}-sp" value="20"><br>
-        <label>攻撃</label><input type="number" id="${name}-atk" value="10"><br>
-        <label>防御</label><input type="number" id="${name}-def" value="10"><br>
-        <label>速度</label><input type="number" id="${name}-spd" value="10"><br>
-      `;
-      container.appendChild(div);
-    });
+    <a href="dev_items_editor.html" 
+       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+       🎒 アイテム編集
+    </a>
 
-    document.getElementById("saveButton").addEventListener("click", () => {
-      const data = {};
-      characters.forEach(name => {
-        data[name] = {
-          hp: parseInt(document.getElementById(`${name}-hp`).value),
-          mp: parseInt(document.getElementById(`${name}-mp`).value),
-          sp: parseInt(document.getElementById(`${name}-sp`).value),
-          atk: parseInt(document.getElementById(`${name}-atk`).value),
-          def: parseInt(document.getElementById(`${name}-def`).value),
-          spd: parseInt(document.getElementById(`${name}-spd`).value)
-        };
-      });
-      localStorage.setItem("npcStats", JSON.stringify(data));
-      alert("保存しました！");
-    });
-  </script>
+    <a href="dev_char_icons.html" 
+       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+       🖼 キャラクターアイコン管理
+    </a>
+
+    <a href="dev_cutins.html" 
+       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+       🎬 カットイン編集
+    </a>
+
+    <a href="index.html" 
+       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+       🏠 メイン画面に戻る
+    </a>
+  </div>
 
 </body>
 </html>
