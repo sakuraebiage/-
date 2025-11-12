@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>開発者モード：ステータス編集</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
+
+<h1 class="text-3xl font-bold mb-6">⚙️ PCステータス編集</h1>
+
+<a href="dev_setting.html" class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 mb-4">← 開発メニューに戻る</a>
+
+<div id="charList" class="space-y-4"></div>
+
+<button id="saveAll" class="mt-6 px-6 py-3 bg-green-600 rounded hover:bg-green-500 font-bold">💾 保存</button>
+
+<script>
+const characters = [
+  { id: "shizumi", name: "静海" },
+  { id: "kohaku", name: "瑚白" },
+  { id: "houraku", name: "宝楽" },
+  { id: "keika", name: "恵佳" },
+  { id: "aoi", name: "アオイ" },
+  { id: "tsukuyomi", name: "月詠" },
+  { id: "ulysis", name: "ユリシス" },
+  { id: "kanana", name: "神奈" },
+  { id: "kaname", name: "要" },
+  { id: "sei", name: "セイ" },
+  { id: "saitou", name: "斎慧斗" },
+  { id: "rakel", name: "ラケル" },
+  { id: "kuroto", name: "九条黒斗" },
+  { id: "kanade", name: "四葉奏" },
+  { id: "ai", name: "四葉愛" },
+  { id: "hozumi", name: "十束穂珠" },
+  { id: "sousui", name: "蒼翠" },
+  { id: "lumina", name: "ルミナ" },
+  { id: "kuun", name: "くぅーん様" },
+  { id: "shiro", name: "しろ" }
+];
+
+const charList = document.getElementById("charList");
+
+// ローカルストレージに保存済みデータがあれば読み込む
+const savedData = JSON.parse(localStorage.getItem("pcStats") || "{}");
+
+characters.forEach(char => {
+  const section = document.createElement("div");
+  section.className = "bg-gray-800 rounded-2xl p-4";
+
+  const charData = savedData[char.id] || { hp:100, atk:50, def:50, spd:30, position:"front", skills:[], lines:[] };
+
+  section.innerHTML = `
+    <details class="group">
+      <summary class="cursor-pointer text-xl font-semibold mb-2">${char.name}</summary>
+      <div class="grid grid-cols-2 gap-4 mt-4">
+        <label>HP<input type="number" id="${char.id}_hp" class="w-full text-black p-1 rounded" value="${charData.hp}"></label>
+        <label>攻撃<input type="number" id="${char.id}_atk" class="w-full text-black p-1 rounded" value="${charData.atk}"></label>
+        <label>防御<input type="number" id="${char.id}_def" class="w-full text-black p-1 rounded" value="${charData.def}"></label>
+        <label>速力<input type="number" id="${char.id}_spd" class="w-full text-black p-1 rounded" value="${charData.spd}"></label>
+      </div>
+
+      <div class="mt-4">
+        <label>前列/後列：
+          <select id="${char.id}_position" class="text-black p-1 rounded">
+            <option value="front" ${charData.position==="front"?"selected":""}>前列</option>
+            <option value="back" ${charData.position==="back"?"selected":""}>後列</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="mt-4">
+        <label>スキル設定（カンマ区切り）</label>
+        <textarea id="${char.id}_skills" rows="2" class="w-full text-black p-2 rounded">${charData.skills.join(",")}</textarea>
+      </div>
+
+      <div class="mt-4">
+        <label>戦闘セリフ（開始/奥義/勝利）</label>
+        <textarea id="${char.id}_lines" rows="3" class="w-full text-black p-2 rounded">${charData.lines.join("\n")}</textarea>
+      </div>
+    </details>
+  `;
+
+  charList.appendChild(section);
+});
+
+// 保存ボタン
+document.getElementById("saveAll").addEventListener("click", () => {
+  const data = {};
+  characters.forEach(char => {
+    data[char.id] = {
+      name: char.name,
+      hp: Number(document.getElementById(`${char.id}_hp`).value),
+      atk: Number(document.getElementById(`${char.id}_atk`).value),
+      def: Number(document.getElementById(`${char.id}_def`).value),
+      spd: Number(document.getElementById(`${char.id}_spd`).value),
+      position: document.getElementById(`${char.id}_position`).value,
+      skills: document.getElementById(`${char.id}_skills`).value.split(",").map(s=>s.trim()).filter(s=>s),
+      lines: document.getElementById(`${char.id}_lines`).value.split("\n").map(l=>l.trim()).filter(l=>l)
+    };
+  });
+  localStorage.setItem("pcStats", JSON.stringify(data));
+  alert("PCステータスを保存しました！");
+});
+</script>
+
+</body>
+</html>
