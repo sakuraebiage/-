@@ -1,188 +1,166 @@
-<!-- 裏メニュー: 開発者ステータス編集 -->
-<div id="devPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);color:#e0e0e0;z-index:2000;overflow:auto;padding:20px;">
-  <h2 style="color:#8ae1ff;">⚙️ 開発者ステータス編集</h2>
-  
-  <div style="margin-bottom:15px;">
-    <label>キャラ選択:
-      <select id="devCharSelect"></select>
-    </label>
-    <button id="devAddChar">新規追加</button>
-    <button id="devDeleteChar">削除</button>
-  </div>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>開発者設定 - PCステータス編集</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #0b0d10;
+      color: #e8e8e8;
+      padding: 20px;
+    }
 
-  <div id="devForm" style="display:flex;flex-wrap:wrap;gap:15px;">
-    <div>
-      <label>名前:<br><input type="text" id="devName"></label>
+    h1 {
+      color: #ffb347;
+      text-shadow: 0 0 8px #ffb347;
+    }
+
+    section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: inline-block;
+      width: 120px;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      padding: 6px;
+      width: 180px;
+    }
+
+    .flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    button {
+      background: #ffb347;
+      border: none;
+      color: #111;
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #ffd480;
+    }
+
+    details {
+      background: rgba(255, 255, 255, 0.07);
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>⚙ 開発者設定（PC専用）</h1>
+
+  <!-- ステータス設定 -->
+  <section>
+    <h2>🧬 ステータス設定</h2>
+    <div class="flex">
+      <div><label>名前</label><input id="pcName" placeholder="例：静海"></div>
+      <div><label>HP</label><input type="number" id="hp" value="1000"></div>
+      <div><label>攻撃</label><input type="number" id="atk" value="150"></div>
+      <div><label>防御</label><input type="number" id="def" value="120"></div>
+      <div><label>速度</label><input type="number" id="spd" value="100"></div>
+      <div><label>魔力</label><input type="number" id="mag" value="130"></div>
     </div>
-    <div>
-      <label>HP:<br><input type="number" id="devHP" min="0"></label>
+    <div style="margin-top: 10px;">
+      <label>位置</label>
+      <select id="position">
+        <option value="front">前列</option>
+        <option value="back">後列</option>
+      </select>
     </div>
-    <div>
-      <label>MP:<br><input type="number" id="devMP" min="0"></label>
-    </div>
-    <div>
-      <label>攻撃:<br><input type="number" id="devATK" min="0"></label>
-    </div>
-    <div>
-      <label>防御:<br><input type="number" id="devDEF" min="0"></label>
-    </div>
-    <div>
-      <label>魔攻:<br><input type="number" id="devMAG" min="0"></label>
-    </div>
-    <div>
-      <label>魔防:<br><input type="number" id="devMDEF" min="0"></label>
-    </div>
-    <div>
-      <label>素早さ:<br><input type="number" id="devSPD" min="0"></label>
-    </div>
-    <div>
-      <label>幸運:<br><input type="number" id="devLUK" min="0"></label>
-    </div>
-    <div>
-      <label>属性:<br>
-        <select id="devElement">
-          <option value="炎">炎</option>
-          <option value="水">水</option>
-          <option value="風">風</option>
-          <option value="地">地</option>
-          <option value="氷">氷</option>
-          <option value="雷">雷</option>
-          <option value="光">光</option>
-          <option value="闇">闇</option>
-          <option value="天">天</option>
+  </section>
+
+  <!-- スキル設定 -->
+  <section>
+    <h2>🔥 スキル設定</h2>
+    <details open>
+      <summary>登録済みスキル一覧（クリックで開閉）</summary>
+      <ul id="skillList">
+        <li>炎撃斬（威力: 1.5 / 対象: 敵単体）</li>
+        <li>炎神覇斬（威力: 9.0 / 対象: 敵全体）</li>
+        <li>炎の壁（防御↑ + カウンター）</li>
+      </ul>
+    </details>
+
+    <h3>新スキル登録</h3>
+    <div class="flex">
+      <div><label>スキル名</label><input id="skillName"></div>
+      <div><label>威力倍率</label><input type="number" id="skillPower" step="0.1" value="1.0"></div>
+      <div><label>対象</label>
+        <select id="skillTarget">
+          <option value="enemy_single">敵単体</option>
+          <option value="enemy_all">敵全体</option>
+          <option value="ally_single">味方単体</option>
+          <option value="ally_all">味方全体</option>
+          <option value="self">自分</option>
         </select>
-      </label>
+      </div>
+      <div><label>発動条件</label>
+        <select id="skillCondition">
+          <option value="manual">手動</option>
+          <option value="auto_lowhp">HP低下時</option>
+          <option value="auto_turn3">3ターン経過</option>
+        </select>
+      </div>
     </div>
-    <div style="flex-basis:100%;">
-      <label>備考:<br><textarea id="devNotes" rows="3" style="width:100%;"></textarea></label>
-    </div>
-  </div>
+    <button onclick="addSkill()">＋ スキル追加</button>
+  </section>
 
-  <div style="margin-top:15px;">
-    <button id="devSave">保存</button>
-    <button id="devReset">リセット</button>
-    <button id="devExport">JSON出力</button>
-    <button id="devImport">JSON読み込み</button>
-    <button id="devClose">閉じる</button>
-  </div>
-</div>
+  <section>
+    <h2>💾 保存操作</h2>
+    <button onclick="saveSettings()">設定を保存</button>
+  </section>
 
-<script>
-const devPanel = document.getElementById("devPanel");
-const devCharSelect = document.getElementById("devCharSelect");
-const devName = document.getElementById("devName");
-const devHP = document.getElementById("devHP");
-const devMP = document.getElementById("devMP");
-const devATK = document.getElementById("devATK");
-const devDEF = document.getElementById("devDEF");
-const devMAG = document.getElementById("devMAG");
-const devMDEF = document.getElementById("devMDEF");
-const devSPD = document.getElementById("devSPD");
-const devLUK = document.getElementById("devLUK");
-const devElement = document.getElementById("devElement");
-const devNotes = document.getElementById("devNotes");
+  <script>
+    function addSkill() {
+      const name = document.getElementById('skillName').value;
+      const power = document.getElementById('skillPower').value;
+      const target = document.getElementById('skillTarget').options[document.getElementById('skillTarget').selectedIndex].text;
+      const cond = document.getElementById('skillCondition').options[document.getElementById('skillCondition').selectedIndex].text;
 
-let devData = JSON.parse(localStorage.getItem("devChars")) || [];
+      if (!name) return alert("スキル名を入力してください");
 
-// 開発者画面ショートカット
-document.addEventListener("keydown", (e)=>{
-  if(e.shiftKey && e.altKey && e.key.toLowerCase()==="d"){
-    devPanel.style.display = devPanel.style.display==="none"?"flex":"none";
-    populateCharSelect();
-  }
-});
+      const li = document.createElement('li');
+      li.textContent = `${name}（威力: ${power} / 対象: ${target} / 条件: ${cond}）`;
+      document.getElementById('skillList').appendChild(li);
+      document.getElementById('skillName').value = '';
+    }
 
-// キャラ選択反映
-function populateCharSelect(){
-  devCharSelect.innerHTML="";
-  devData.forEach((c,i)=>{
-    const opt=document.createElement("option");
-    opt.value=i;
-    opt.textContent=c.name;
-    devCharSelect.appendChild(opt);
-  });
-  if(devData.length>0){
-    devCharSelect.selectedIndex=0;
-    loadChar(devCharSelect.value);
-  }
-}
-
-function loadChar(index){
-  const c = devData[index];
-  if(!c) return;
-  devName.value=c.name;
-  devHP.value=c.hp;
-  devMP.value=c.mp;
-  devATK.value=c.atk;
-  devDEF.value=c.def;
-  devMAG.value=c.mag;
-  devMDEF.value=c.mdef;
-  devSPD.value=c.spd;
-  devLUK.value=c.luk;
-  devElement.value=c.element;
-  devNotes.value=c.notes;
-}
-
-devCharSelect.addEventListener("change", ()=>loadChar(devCharSelect.value));
-
-document.getElementById("devSave").addEventListener("click", ()=>{
-  const idx=devCharSelect.value;
-  devData[idx]={
-    name:devName.value,
-    hp:+devHP.value,
-    mp:+devMP.value,
-    atk:+devATK.value,
-    def:+devDEF.value,
-    mag:+devMAG.value,
-    mdef:+devMDEF.value,
-    spd:+devSPD.value,
-    luk:+devLUK.value,
-    element:devElement.value,
-    notes:devNotes.value
-  };
-  localStorage.setItem("devChars", JSON.stringify(devData));
-  populateCharSelect();
-  alert("保存しました！");
-});
-
-document.getElementById("devAddChar").addEventListener("click", ()=>{
-  const newChar={name:"新規キャラ",hp:100,mp:50,atk:50,def:50,mag:50,mdef:50,spd:50,luk:10,element:"炎",notes:""};
-  devData.push(newChar);
-  localStorage.setItem("devChars", JSON.stringify(devData));
-  populateCharSelect();
-});
-
-document.getElementById("devDeleteChar").addEventListener("click", ()=>{
-  const idx=devCharSelect.value;
-  if(confirm(`本当に ${devData[idx].name} を削除しますか？`)){
-    devData.splice(idx,1);
-    localStorage.setItem("devChars", JSON.stringify(devData));
-    populateCharSelect();
-  }
-});
-
-document.getElementById("devReset").addEventListener("click", ()=>{
-  loadChar(devCharSelect.value);
-});
-
-document.getElementById("devClose").addEventListener("click", ()=>{
-  devPanel.style.display="none";
-});
-
-document.getElementById("devExport").addEventListener("click", ()=>{
-  const json=JSON.stringify(devData,null,2);
-  prompt("コピーして保存してください", json);
-});
-
-document.getElementById("devImport").addEventListener("click", ()=>{
-  const json=prompt("JSONを貼り付けてください");
-  try{
-    const data=JSON.parse(json);
-    if(Array.isArray(data)){
-      devData=data;
-      localStorage.setItem("devChars", JSON.stringify(devData));
-      populateCharSelect();
-    } else { alert("不正な形式です"); }
-  } catch(e){ alert("読み込みエラー"); }
-});
-</script>
+    function saveSettings() {
+      const data = {
+        name: document.getElementById('pcName').value,
+        hp: document.getElementById('hp').value,
+        atk: document.getElementById('atk').value,
+        def: document.getElementById('def').value,
+        spd: document.getElementById('spd').value,
+        mag: document.getElementById('mag').value,
+        pos: document.getElementById('position').value,
+        skills: [...document.querySelectorAll('#skillList li')].map(li => li.textContent)
+      };
+      localStorage.setItem('dev_pc_settings', JSON.stringify(data));
+      alert("設定を保存しました！");
+    }
+  </script>
+</body>
+</html>
