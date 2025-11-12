@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>開発者モード</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-900 text-white p-6">
+  <h1 class="text-2xl font-bold mb-4">開発者モード</h1>
+
+  <div class="space-y-4">
+    <button onclick="location.href='battle_setting.html'" class="btn">戦闘設定を開く</button>
+    <button onclick="location.href='dev_stats_editor.html'" class="btn">キャラクターステータス編集</button>
+    <button onclick="location.href='battle_test.html'" class="btn">戦闘テスト開始</button>
+  </div>
+
+  <script>
+    // 開発者用ロック解除キー (例)
+    const password = prompt("開発者パスワードを入力してください:");
+    if (password !== "harufa_dev") {
+      alert("アクセス拒否されました。");
+      location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
