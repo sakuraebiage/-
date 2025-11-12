@@ -5,79 +5,21 @@
 <title>星守戦線 - 戦闘</title>
 <link rel="stylesheet" href="battle.css">
 <style>
-body {
-  margin:0;
-  font-family:"Consolas","Roboto Mono",monospace;
-  background:#000;
-  color:#e0e0e0;
-}
-header {
-  background:#111;
-  padding:10px 20px;
-  border-bottom:1px solid #444;
-  text-align:center;
-}
+body { margin:0; font-family:"Consolas","Roboto Mono",monospace; background:#000; color:#e0e0e0; }
+header { background:#111; padding:10px 20px; border-bottom:1px solid #444; text-align:center; }
 header h1 { color:#8ae1ff; }
 
-#battle-container {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:10px;
-}
-
-#battlefield {
-  display:flex;
-  justify-content:space-between;
-  width:90%;
-  max-width:1200px;
-  margin-top:20px;
-  min-height:300px;
-  position:relative;
-}
-
-.party {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-
-.character-card {
-  width:80px;
-  margin:5px;
-  text-align:center;
-  transition: all 0.3s ease;
-}
-
-.character-card img {
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  border:2px solid #8ae1ff;
-}
-
-.status-bar {
-  height:6px;
-  width:60px;
-  background:#222;
-  margin:2px 0;
-  border-radius:3px;
-  overflow:hidden;
-}
+#battle-container { display:flex; flex-direction:column; align-items:center; padding:10px; }
+#battlefield { display:flex; justify-content:space-between; width:90%; max-width:1200px; margin-top:20px; min-height:300px; position:relative; }
+.party { display:flex; flex-direction:column; align-items:center; }
+.character-card { width:80px; margin:5px; text-align:center; transition: all 0.3s ease; }
+.character-card img { width:50px; height:50px; border-radius:50%; border:2px solid #8ae1ff; }
+.status-bar { height:6px; width:60px; background:#222; margin:2px 0; border-radius:3px; overflow:hidden; }
 .hp-fill { background:#ff4b4b; height:100%; width:100%; }
 .sp-fill { background:#4bafff; height:100%; width:100%; }
 .mp-fill { background:#8aff4b; height:100%; width:100%; }
 
-#action-log {
-  width:90%;
-  max-width:1200px;
-  background:#111;
-  border:1px solid #444;
-  margin-top:15px;
-  padding:10px;
-  height:120px;
-  overflow-y:auto;
-}
+#action-log { width:90%; max-width:1200px; background:#111; border:1px solid #444; margin-top:15px; padding:10px; height:120px; overflow-y:auto; }
 .action-entry { margin-bottom:4px; }
 </style>
 </head>
@@ -105,14 +47,7 @@ header h1 { color:#8ae1ff; }
 </div>
 
 <script>
-// ======== サンプルデータ ========
-const alliesData = [
-  {name:"味方1", hp:100, sp:50, mp:30},
-  {name:"味方2", hp:100, sp:50, mp:30},
-  {name:"味方3", hp:100, sp:50, mp:30},
-  {name:"味方4", hp:100, sp:50, mp:30}
-];
-
+// ======== 敵は固定 ========
 const enemiesData = [
   {name:"敵1", hp:100, sp:50, mp:30},
   {name:"敵2", hp:100, sp:50, mp:30},
@@ -120,10 +55,25 @@ const enemiesData = [
   {name:"敵4", hp:100, sp:50, mp:30}
 ];
 
+// ======== PCステータス取得 ========
+function loadPCStats() {
+  const stats = JSON.parse(localStorage.getItem("pcStats") || "{}");
+  // ここでは最初の4人を味方に
+  return [
+    stats["shizumi"] || {name:"静海", hp:100, sp:50, mp:30},
+    stats["kohaku"] || {name:"瑚白", hp:100, sp:50, mp:30},
+    stats["houraku"] || {name:"宝楽", hp:100, sp:50, mp:30},
+    stats["keika"] || {name:"恵佳", hp:100, sp:50, mp:30}
+  ];
+}
+
+let alliesData = loadPCStats();
+
 // ======== キャラクター生成 ========
-function createCharacterCard(char) {
+function createCharacterCard(char, idPrefix) {
   const div = document.createElement("div");
   div.classList.add("character-card");
+  div.id = `${idPrefix}_${char.name}`;
 
   div.innerHTML = `
     <img src="https://placehold.co/50x50?text=?" alt="${char.name}">
@@ -138,8 +88,13 @@ function createCharacterCard(char) {
 const alliesContainer = document.getElementById("allies");
 const enemiesContainer = document.getElementById("enemies");
 
-alliesData.forEach(c => alliesContainer.appendChild(createCharacterCard(c)));
-enemiesData.forEach(c => enemiesContainer.appendChild(createCharacterCard(c)));
+function renderBattlefield() {
+  alliesContainer.innerHTML = "<h3>味方</h3>";
+  enemiesContainer.innerHTML = "<h3>敵</h3>";
+
+  alliesData.forEach(c => alliesContainer.appendChild(createCharacterCard(c,"ally")));
+  enemiesData.forEach(c => enemiesContainer.appendChild(createCharacterCard(c,"enemy")));
+}
 
 // ======== アクションログ ========
 const actionLog = document.getElementById("action-log");
@@ -151,9 +106,23 @@ function logAction(actor, action, target) {
   actionLog.scrollTop = actionLog.scrollHeight;
 }
 
-// ======== テストログ ========
-setTimeout(()=>logAction("味方1","攻撃","敵2"),1000);
-setTimeout(()=>logAction("敵3","魔法","味方2"),2000);
+// ======== 戦闘開始 ========
+renderBattlefield();
+setTimeout(()=>logAction("静海","攻撃","敵1"),1000);
+setTimeout(()=>logAction("敵2","魔法","恵佳"),2000);
+
+// ======== リアルタイム更新 ========
+setInterval(()=>{
+  alliesData = loadPCStats();
+  alliesData.forEach(c=>{
+    const card = document.getElementById(`ally_${c.name}`);
+    if(card){
+      card.querySelector(".hp-fill").style.width = c.hp+"%";
+      card.querySelector(".sp-fill").style.width = c.sp+"%";
+      card.querySelector(".mp-fill").style.width = c.mp+"%";
+    }
+  });
+},1000); // 1秒ごとにステータス更新
 
 </script>
 </body>
