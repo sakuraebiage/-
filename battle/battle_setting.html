@@ -1,1 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>戦闘設定画面</title>
+  <style>
+    body {
+      background: #0d1117;
+      color: #e8e8e8;
+      font-family: "Segoe UI", sans-serif;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #ffcc70;
+      text-shadow: 0 0 8px #ffcc70;
+    }
+
+    section {
+      margin-bottom: 24px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    button {
+      background: #ffb347;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #ffd480;
+    }
+
+    .dev-btn {
+      background: linear-gradient(90deg, #ffcc70, #ff7e5f);
+      color: #111;
+      font-weight: bold;
+      border-radius: 12px;
+      padding: 10px 20px;
+      margin-top: 16px;
+      box-shadow: 0 0 10px #ffb347;
+    }
+
+    .dev-btn:hover {
+      background: linear-gradient(90deg, #ffd480, #ff8f70);
+      box-shadow: 0 0 18px #ffb347;
+    }
+
+    .notice {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>⚔ 戦闘設定画面</h1>
+
+  <section>
+    <h2>プレイヤーキャラクター設定</h2>
+    <p>各キャラクターのステータスやスキルを設定します。</p>
+
+    <button onclick="openDevSetting()">開発者設定を開く</button>
+    <p class="notice">※開発者専用画面です。一般プレイヤーはアクセス不可。</p>
+  </section>
+
+  <section>
+    <h2>戦闘モード</h2>
+    <select id="battleMode">
+      <option value="standard">通常戦闘</option>
+      <option value="test">テストモード</option>
+    </select>
+    <p class="notice">※テストモードでは全ダメージ倍率が1.5倍になります。</p>
+  </section>
+
+  <section>
+    <button onclick="saveBattleSetting()">設定を保存</button>
+  </section>
+
+  <script>
+    function openDevSetting() {
+      // 🔒 開発者モード保護（URL直アクセス対策用）
+      const pass = prompt("開発者パスコードを入力してください：");
+      if (pass === "halpha_dev") {
+        window.location.href = "dev_setting.html";
+      } else {
+        alert("アクセス拒否：パスコードが違います。");
+      }
+    }
+
+    function saveBattleSetting() {
+      const mode = document.getElementById('battleMode').value;
+      localStorage.setItem("battle_mode", mode);
+      alert("戦闘設定を保存しました！");
+    }
+  </script>
+</body>
+</html>
 
