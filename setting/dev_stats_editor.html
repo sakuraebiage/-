@@ -2,68 +2,63 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>開発者メニュー</title>
+  <title>ステータス編集</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen p-6">
 
-  <h1 class="text-3xl font-bold mb-6">⚙️ 開発者メニュー</h1>
+  <h1 class="text-2xl font-bold mb-6">🧩 ステータス編集</h1>
 
-  <p class="mb-4">ここから各開発用画面にアクセスできます。</p>
+  <form id="statsForm" class="space-y-4">
+    <div>
+      <label class="block mb-1">キャラクター名</label>
+      <input type="text" id="charName" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded" placeholder="例: 静海">
+    </div>
 
-  <div class="space-y-2">
-    <!-- ステータス編集 -->
-    <a href="dev_stats_editor.html" 
-       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
-       🧩 ステータス編集画面
-    </a>
+    <div class="grid grid-cols-2 gap-4">
+      <div><label>HP</label><input type="number" id="hp" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded"></div>
+      <div><label>攻撃</label><input type="number" id="atk" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded"></div>
+      <div><label>防御</label><input type="number" id="def" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded"></div>
+      <div><label>速力</label><input type="number" id="spd" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded"></div>
+    </div>
 
-    <!-- 戦闘設定 -->
-    <a href="dev_battle_settings.html" 
-       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
-       ⚔ 戦闘設定画面
-    </a>
+    <div>
+      <label class="block mb-1">位置</label>
+      <select id="position" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded">
+        <option value="front">前列</option>
+        <option value="back">後列</option>
+      </select>
+    </div>
 
-    <!-- スキル編集 -->
-    <a href="dev_skills_editor.html" 
-       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
-       ✨ スキル一覧編集
-    </a>
+    <div>
+      <label class="block mb-1">スキルセット</label>
+      <textarea id="skills" rows="3" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded" placeholder="例: 烈火斬, 蒼嵐突"></textarea>
+    </div>
 
-    <!-- アイテム編集 -->
-    <a href="dev_items_editor.html" 
-       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
-       🎒 アイテム編集
-    </a>
+    <div>
+      <label class="block mb-1">戦闘セリフ</label>
+      <textarea id="battleLines" rows="3" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded" placeholder="例: 『まだ終わらせない！』"></textarea>
+    </div>
 
-    <!-- キャラクターアイコン管理 -->
-    <a href="dev_char_icons.html" 
-       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
-       🖼 キャラクターアイコン管理
-    </a>
+    <button type="button" id="saveBtn" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">💾 保存</button>
+  </form>
 
-    <!-- カットイン編集 -->
-    <a href="dev_cutins.html" 
-       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
-       🎬 カットイン編集
-    </a>
-
-    <!-- メイン画面に戻る -->
-    <a href="../index.html" 
-       class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
-       🏠 メイン画面に戻る
-    </a>
-  </div>
-
-  <!-- 説明文 -->
-  <div class="mt-6 text-gray-400">
-    <p>💡 補足：</p>
-    <ul class="list-disc ml-5">
-      <li>ステータス編集画面では NPC/PC の HP, 攻撃, 防御, 速力、前列/後列、スキル、戦闘セリフを変更可能。</li>
-      <li>戦闘設定画面ではバトルルール、ターゲット、発動条件などを設定可能。</li>
-      <li>スキル一覧編集ではスキル名、威力倍率、副産物、状態異常、バフ・デバフの種類を設定可能。</li>
-    </ul>
-  </div>
+  <script>
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const data = {
+        name: document.getElementById("charName").value,
+        hp: document.getElementById("hp").value,
+        atk: document.getElementById("atk").value,
+        def: document.getElementById("def").value,
+        spd: document.getElementById("spd").value,
+        pos: document.getElementById("position").value,
+        skills: document.getElementById("skills").value,
+        lines: document.getElementById("battleLines").value
+      };
+      localStorage.setItem("charStats", JSON.stringify(data));
+      alert("保存しました！");
+    });
+  </script>
 
 </body>
 </html>
