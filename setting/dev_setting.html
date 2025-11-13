@@ -2,165 +2,32 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>開発者設定 - PCステータス編集</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #0b0d10;
-      color: #e8e8e8;
-      padding: 20px;
-    }
-
-    h1 {
-      color: #ffb347;
-      text-shadow: 0 0 8px #ffb347;
-    }
-
-    section {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-
-    label {
-      display: inline-block;
-      width: 120px;
-      margin-bottom: 6px;
-    }
-
-    input, select, textarea {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      padding: 6px;
-      width: 180px;
-    }
-
-    .flex {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    button {
-      background: #ffb347;
-      border: none;
-      color: #111;
-      font-weight: bold;
-      padding: 8px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    button:hover {
-      background: #ffd480;
-    }
-
-    details {
-      background: rgba(255, 255, 255, 0.07);
-      padding: 10px;
-      border-radius: 8px;
-    }
-  </style>
+  <title>開発者メニュー</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
 
-<body>
-  <h1>⚙ 開発者設定（PC専用）</h1>
+  <h1 class="text-3xl font-bold mb-6">⚙️ 開発者メニュー</h1>
+  <p class="mb-4">ここから各開発用画面にアクセスできます。</p>
 
-  <!-- ステータス設定 -->
-  <section>
-    <h2>🧬 ステータス設定</h2>
-    <div class="flex">
-      <div><label>名前</label><input id="pcName" placeholder="例：静海"></div>
-      <div><label>HP</label><input type="number" id="hp" value="1000"></div>
-      <div><label>攻撃</label><input type="number" id="atk" value="150"></div>
-      <div><label>防御</label><input type="number" id="def" value="120"></div>
-      <div><label>速度</label><input type="number" id="spd" value="100"></div>
-      <div><label>魔力</label><input type="number" id="mag" value="130"></div>
-    </div>
-    <div style="margin-top: 10px;">
-      <label>位置</label>
-      <select id="position">
-        <option value="front">前列</option>
-        <option value="back">後列</option>
-      </select>
-    </div>
-  </section>
+  <div class="space-y-2">
+    <a href="dev_stats_editor.html" class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">🧩 ステータス編集画面</a>
+    <a href="dev_battle_settings.html" class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">⚔ 戦闘設定画面</a>
+    <a href="dev_skills_editor.html" class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">✨ スキル一覧編集</a>
+    <a href="dev_items_editor.html" class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">🎒 アイテム編集</a>
+    <a href="dev_char_icons.html" class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">🖼 キャラクターアイコン管理</a>
+    <a href="dev_cutins.html" class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">🎬 カットイン編集</a>
+    <a href="../index.html" class="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">🏠 メイン画面に戻る</a>
+  </div>
 
-  <!-- スキル設定 -->
-  <section>
-    <h2>🔥 スキル設定</h2>
-    <details open>
-      <summary>登録済みスキル一覧（クリックで開閉）</summary>
-      <ul id="skillList">
-        <li>炎撃斬（威力: 1.5 / 対象: 敵単体）</li>
-        <li>炎神覇斬（威力: 9.0 / 対象: 敵全体）</li>
-        <li>炎の壁（防御↑ + カウンター）</li>
-      </ul>
-    </details>
+  <div class="mt-6 text-gray-400">
+    <p>💡 補足：</p>
+    <ul class="list-disc ml-5">
+      <li>ステータス編集画面では PC の HP / 攻撃 / 防御 / 速力 / 前列後列 / スキル / 戦闘セリフ を変更可能。</li>
+      <li>戦闘設定画面ではバトルルール・ターゲット・発動条件を設定可能。</li>
+      <li>敵NPCは基本一律ステータス、自動処理。</li>
+    </ul>
+  </div>
 
-    <h3>新スキル登録</h3>
-    <div class="flex">
-      <div><label>スキル名</label><input id="skillName"></div>
-      <div><label>威力倍率</label><input type="number" id="skillPower" step="0.1" value="1.0"></div>
-      <div><label>対象</label>
-        <select id="skillTarget">
-          <option value="enemy_single">敵単体</option>
-          <option value="enemy_all">敵全体</option>
-          <option value="ally_single">味方単体</option>
-          <option value="ally_all">味方全体</option>
-          <option value="self">自分</option>
-        </select>
-      </div>
-      <div><label>発動条件</label>
-        <select id="skillCondition">
-          <option value="manual">手動</option>
-          <option value="auto_lowhp">HP低下時</option>
-          <option value="auto_turn3">3ターン経過</option>
-        </select>
-      </div>
-    </div>
-    <button onclick="addSkill()">＋ スキル追加</button>
-  </section>
-
-  <section>
-    <h2>💾 保存操作</h2>
-    <button onclick="saveSettings()">設定を保存</button>
-  </section>
-
-  <script>
-    function addSkill() {
-      const name = document.getElementById('skillName').value;
-      const power = document.getElementById('skillPower').value;
-      const target = document.getElementById('skillTarget').options[document.getElementById('skillTarget').selectedIndex].text;
-      const cond = document.getElementById('skillCondition').options[document.getElementById('skillCondition').selectedIndex].text;
-
-      if (!name) return alert("スキル名を入力してください");
-
-      const li = document.createElement('li');
-      li.textContent = `${name}（威力: ${power} / 対象: ${target} / 条件: ${cond}）`;
-      document.getElementById('skillList').appendChild(li);
-      document.getElementById('skillName').value = '';
-    }
-
-    function saveSettings() {
-      const data = {
-        name: document.getElementById('pcName').value,
-        hp: document.getElementById('hp').value,
-        atk: document.getElementById('atk').value,
-        def: document.getElementById('def').value,
-        spd: document.getElementById('spd').value,
-        mag: document.getElementById('mag').value,
-        pos: document.getElementById('position').value,
-        skills: [...document.querySelectorAll('#skillList li')].map(li => li.textContent)
-      };
-      localStorage.setItem('dev_pc_settings', JSON.stringify(data));
-      alert("設定を保存しました！");
-    }
-  </script>
 </body>
 </html>
