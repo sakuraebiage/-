@@ -12,6 +12,10 @@ body {
   display:flex;
   flex-direction:column;
 }
+
+/* 共通ヘッダーの高さを確保 */
+#header-container { width:100%; }
+
 #announcement {
   width:100%;
   text-align:center;
@@ -99,32 +103,33 @@ body {
 </style>
 </head>
 <body>
-  <!-- 共通ヘッダー -->
-  <div id="header-container"></div>
-  <script src="../common/header-loader.js"></script>
 
-  <!-- お知らせ -->
-  <div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
+<!-- 共通ヘッダー -->
+<div id="header-container"></div>
+<script src="../common/header-loader.js"></script>
 
-  <!-- メイン画面 -->
-  <div id="main-container">
-    <div id="map"></div>
-    <div id="status-panel"></div>
-  </div>
+<!-- お知らせ -->
+<div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
 
-  <!-- モーダル -->
-  <div class="modal-bg" id="modalBg">
-    <div class="modal-content" id="modalContent">
-      <h3 id="modalTitle"></h3>
-      <div id="modalBody"></div>
-      <div>
-        <button id="combatBtn">⚔ 戦闘</button>
-        <button id="exploreBtn">🧭 探索</button>
-        <button id="rescueBtn">🩹 救助</button>
-      </div>
-      <button onclick="closeModal()">閉じる</button>
+<!-- メイン画面 -->
+<div id="main-container">
+  <div id="map"></div>
+  <div id="status-panel"></div>
+</div>
+
+<!-- モーダル -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-content" id="modalContent">
+    <h3 id="modalTitle"></h3>
+    <div id="modalBody"></div>
+    <div>
+      <button id="combatBtn">⚔ 戦闘</button>
+      <button id="exploreBtn">🧭 探索</button>
+      <button id="rescueBtn">🩹 救助</button>
     </div>
+    <button onclick="closeModal()">閉じる</button>
   </div>
+</div>
 
 <script>
 // 要素取得
@@ -136,6 +141,10 @@ const modalTitle = document.getElementById("modalTitle");
 const modalBody = document.getElementById("modalBody");
 
 let currentChar = JSON.parse(localStorage.getItem("currentChar")) || { name:"未設定", recentActions:[] };
+
+// アクションログを種類別に保存
+const combatLog = JSON.parse(localStorage.getItem("combatLog")) || [];
+const exploreLog = JSON.parse(localStorage.getItem("exploreLog")) || [];
 
 const bases = [];
 const numBases = 20;
@@ -219,18 +228,28 @@ function updateStatusPanel(){
   });
 }
 
-// アクションログ
-function addAction(action){
+// アクションログ追加
+function addAction(action, type){
   const timestamp = new Date().toLocaleTimeString();
-  currentChar.recentActions.unshift(`[${timestamp}] ${action}`);
-  if(currentChar.recentActions.length>20) currentChar.recentActions.pop();
+  const logEntry = `[${timestamp}] ${action}`;
+  currentChar.recentActions.unshift(logEntry);
+  if(currentChar.recentActions.length>50) currentChar.recentActions.pop();
   localStorage.setItem("currentChar", JSON.stringify(currentChar));
+
+  // 種類別保存
+  if(type==="combat"){
+    combatLog.unshift(logEntry); if(combatLog.length>50) combatLog.pop();
+    localStorage.setItem("combatLog", JSON.stringify(combatLog));
+  } else if(type==="explore"){
+    exploreLog.unshift(logEntry); if(exploreLog.length>50) exploreLog.pop();
+    localStorage.setItem("exploreLog", JSON.stringify(exploreLog));
+  }
 }
 
 let selectedBase = null;
-document.getElementById("combatBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で戦闘行動`); closeModal(); } };
-document.getElementById("exploreBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で探索行動`); closeModal(); } };
-document.getElementById("rescueBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で救助行動`); closeModal(); } };
+document.getElementById("combatBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で戦闘行動`, "combat"); closeModal(); } };
+document.getElementById("exploreBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で探索行動`, "explore"); closeModal(); } };
+document.getElementById("rescueBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で救助行動`, "explore"); closeModal(); } };
 
 updateStatusPanel();
 updateBases();
