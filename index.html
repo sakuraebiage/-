@@ -4,62 +4,17 @@
   <meta charset="UTF-8">
   <title>星守戦線 - トップページ</title>
   <style>
-    body {
-      margin: 0;
-      font-family: "Consolas", "Roboto Mono", monospace;
-      background: #000;
-      color: #e0e0e0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    main {
-      padding: 20px;
-      width: 90%;
-      max-width: 1000px;
-    }
-
-    /* キャラクターカード */
-    .character-card {
-      background: #111;
-      border: 1px solid #555;
-      border-radius: 10px;
-      padding: 10px;
-      width: 200px;
-      text-align: center;
-      display: inline-block;
-      margin: 10px;
-      cursor: pointer;
-    }
-    .character-card img {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 2px solid #8ae1ff;
-      object-fit: cover;
-    }
-    .character-card .character-name {
-      font-weight: bold;
-      color: #8ae1ff;
-      margin-top: 6px;
-    }
+    body { margin:0; font-family:"Consolas","Roboto Mono",monospace; background:#000; color:#e0e0e0; display:flex; flex-direction:column; align-items:center; }
+    main { padding:20px; width:90%; max-width:1000px; }
+    .character-card { background:#111; border:1px solid #555; border-radius:10px; padding:10px; width:200px; text-align:center; display:inline-block; margin:10px; cursor:pointer; }
+    .character-card img { width:120px; height:120px; border-radius:50%; border:2px solid #8ae1ff; object-fit:cover; }
+    .character-card .character-name { font-weight:bold; color:#8ae1ff; margin-top:6px; }
   </style>
 </head>
-
 <body>
-<!-- ✅ 共通ヘッダーを読み込む -->
-<div id="header-container"></div>
-<script src="common/header.js"></script>
+  <div id="header-container"></div>
+  <script src="common/header-loader.js"></script>
 
-<script>
-  fetch("common/header.html")
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById("header-container").innerHTML = html;
-    });
-</script>
-  
   <main>
     <h2>登録キャラクター一覧</h2>
     <div id="character-list"></div>
@@ -73,75 +28,56 @@
   </main>
 
   <script>
-    // ✅ 共通ヘッダー読み込み
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
-      });
-
-    // ======== キャラクター管理ロジック ========
     let userData = JSON.parse(localStorage.getItem("user_chars")) || { chars: [], selectedCharIndex: 0 };
 
     function renderCharList() {
       const list = document.getElementById("charList");
       list.innerHTML = "";
-      userData.chars.forEach((char, i) => {
-        const div = document.createElement("div");
-        div.style.marginBottom = "8px";
-        const selectedMark = userData.selectedCharIndex === i ? "🌟" : "";
-        div.innerHTML = `
-          ${selectedMark} <strong>${char.name}</strong>
-          <img src="${char.icon || 'https://placehold.co/32x32?text=?'}" width="32" height="32">
-          <button onclick="selectChar(${i})">切替</button>
-        `;
+      userData.chars.forEach((char,i)=>{
+        const div=document.createElement("div");
+        div.style.marginBottom="8px";
+        const selectedMark = userData.selectedCharIndex===i?"🌟":"";
+        div.innerHTML = `${selectedMark} <strong>${char.name}</strong>
+          <img src="${char.icon||'https://placehold.co/32x32?text=?'}" width="32" height="32">
+          <button onclick="selectChar(${i})">切替</button>`;
         list.appendChild(div);
       });
     }
 
     function addNewChar() {
       const name = document.getElementById("newCharName").value.trim();
-      if (!name) return alert("名前を入力してください！");
-      const newChar = { name, icon: "", stats: {}, skills: [], points: 0 };
+      if(!name) return alert("名前を入力してください！");
+      const newChar = { name, icon:"", stats:{}, skills:[], points:0 };
       userData.chars.push(newChar);
-      userData.selectedCharIndex = userData.chars.length - 1;
+      userData.selectedCharIndex=userData.chars.length-1;
       localStorage.setItem("user_chars", JSON.stringify(userData));
       renderCharList();
-      document.getElementById("newCharName").value = "";
+      document.getElementById("newCharName").value="";
     }
 
     function selectChar(index) {
-      userData.selectedCharIndex = index;
+      userData.selectedCharIndex=index;
       localStorage.setItem("user_chars", JSON.stringify(userData));
       renderCharList();
     }
 
     renderCharList();
 
-    // ======== 登録済キャラ一覧表示 ========
     const characters = userData.chars;
     const list = document.getElementById("character-list");
-    if (characters.length === 0) {
-      list.innerHTML = "<p>まだキャラクターが登録されていません。</p>";
+    if(characters.length===0){
+      list.innerHTML="<p>まだキャラクターが登録されていません。</p>";
     } else {
-      characters.forEach(c => {
+      characters.forEach(c=>{
         const card = document.createElement("div");
         card.classList.add("character-card");
-
         const img = document.createElement("img");
-        img.src = c.icon || "https://placehold.co/120x120?text=No+Icon";
-
+        img.src=c.icon || "https://placehold.co/120x120?text=No+Icon";
         const name = document.createElement("div");
-        name.textContent = c.name;
+        name.textContent=c.name;
         name.classList.add("character-name");
-
-        card.appendChild(img);
-        card.appendChild(name);
-
-        card.addEventListener("click", () => {
-          window.location.href = "mypage.html?char=" + encodeURIComponent(c.name);
-        });
-
+        card.appendChild(img); card.appendChild(name);
+        card.addEventListener("click",()=>{ window.location.href="mypage/mypage.html?char="+encodeURIComponent(c.name); });
         list.appendChild(card);
       });
     }
