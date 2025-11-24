@@ -19,19 +19,16 @@ button:hover { background:#8ae1ff; color:#000; }
 </head>
 <body>
 
-<header>
-  <h1>戦闘設定（PC専用）</h1>
-  <nav>
-    <a href="../index.html">🏠 ホーム</a>
-    <a href="../craft/craft.html">⚒ クラフト</a>
-    <a href="../items/items.html">🎒 アイテム</a>
-    <a href="../chat/chat.html">💬 チャット</a>
-    <a href="../mypage.html">💪 訓練</a>
-    <a href="../battle_setup.html">⚔ 戦闘設定</a>
-    <a href="../shop.html">🏪 購買</a>
-    <a href="../logout.html">🚪 ログアウト</a>
-  </nav>
-</header>
+<div id="header-container"></div>
+<script src="../common/header.js"></script>
+<script>
+  fetch("../common/header.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("header-container").innerHTML = html;
+    });
+</script>
+
 
 <div id="container">
   <h3>キャラクター一覧</h3>
