@@ -2,54 +2,40 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>星守戦線 - 結果ログ</title>
+<title>結果ログ</title>
 <style>
-body {
-  margin:0;
-  font-family:"Consolas","Roboto Mono",monospace;
-  background:#000;
-  color:#e0e0e0;
-}
-.main-header { position:sticky; top:0; z-index:999; background:#111; border-bottom:1px solid #444; padding:8px 0; text-align:center; }
-.main-header h1 { font-size:1.3em; color:#8ae1ff; margin:0 0 6px 0; }
-.main-nav { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; }
-.main-nav a { color:#8ae1ff; text-decoration:none; font-weight:bold; padding:6px 10px; border-radius:6px; transition:0.3s; }
-.main-nav a:hover { color:#fff; background:rgba(138,225,255,0.2); text-shadow:0 0 5px #00eaff; }
-
-#tabs { display:flex; justify-content:center; gap:10px; margin:10px 0; }
-.tab { cursor:pointer; padding:6px 12px; border-radius:6px; background:#111; border:1px solid #8ae1ff; }
-.tab.active { background:#8ae1ff; color:#000; }
-
-#log-container { padding:10px 20px; max-width:900px; margin:auto; }
-.log-entry { border-bottom:1px solid #333; padding:6px 0; font-size:0.9em; }
-
+body { background:#000; color:#e0e0e0; font-family:"Consolas","Roboto Mono",monospace; margin:0; padding:0;}
+header { padding:10px 20px; background:#111; color:#8ae1ff; text-align:center;}
+.tabs { display:flex; justify-content:center; margin:10px 0; gap:10px;}
+.tabs button { padding:6px 12px; background:#111; border:1px solid #8ae1ff; color:#8ae1ff; cursor:pointer; border-radius:6px; }
+.tabs button.active { background:#8ae1ff; color:#000; }
+#logContainer { padding:20px; max-width:800px; margin:auto; }
+.log-entry { border-bottom:1px solid #444; padding:6px 0; }
+#exploreBtn { margin:10px; padding:6px 12px; border:1px solid #8ae1ff; border-radius:6px; background:#111; color:#8ae1ff; cursor:pointer; }
 </style>
 </head>
 <body>
+<header><h1>結果ログ</h1></header>
 
-<!-- 共通ヘッダー読み込み -->
-<div id="header-container"></div>
-
-<div id="tabs">
-  <div class="tab active" data-type="combat">戦闘</div>
-  <div class="tab" data-type="explore">探索</div>
-  <div class="tab" data-type="rescue">救助</div>
-  <div class="tab" data-type="craft">クラフト</div>
+<div class="tabs">
+  <button data-type="combat" class="active">戦闘</button>
+  <button data-type="explore">探索</button>
+  <button data-type="rescue">救助</button>
+  <button data-type="craft">クラフト</button>
 </div>
 
-<div id="log-container">
-  <p>ログを読み込み中...</p>
-</div>
+<div id="logContainer"></div>
 
-<script src="../common/header-loader.js"></script>
+<button id="exploreBtn">🧭 探索する</button>
+
+<script src="result.js"></script>
 <script>
 // タブ切り替え
-const tabs = document.querySelectorAll(".tab");
-const logContainer = document.getElementById("log-container");
+const tabs = document.querySelectorAll(".tabs button");
 let currentType = "combat";
 
-tabs.forEach(tab=>{
-  tab.addEventListener("click", ()=>{
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
     tabs.forEach(t=>t.classList.remove("active"));
     tab.classList.add("active");
     currentType = tab.dataset.type;
@@ -58,44 +44,23 @@ tabs.forEach(tab=>{
 });
 
 // ログ表示
-function renderLogs(){
-  const logs = JSON.parse(localStorage.getItem(`${currentType}_logs`)) || [];
-  if(logs.length===0){
-    logContainer.innerHTML = `<p>${currentType}ログはまだありません。</p>`;
-    return;
-  }
-  logContainer.innerHTML = "";
-  logs.forEach(entry=>{
-    const div = document.createElement("div");
-    div.classList.add("log-entry");
-    div.textContent = `[${entry.time}] ${entry.text}`;
-    logContainer.appendChild(div);
-  });
+function renderLogs() {
+  const container = document.getElementById("logContainer");
+  const logs = getResults(currentType);
+  container.innerHTML = logs.length ? logs.map(l=>`<div class="log-entry">[${l.timestamp}] ${l.result}</div>`).join("") 
+                                   : "<p>まだ結果はありません。</p>";
 }
 
-// サンプルログ追加（初回確認用）
-function addSampleLogs(){
-  if(!localStorage.getItem("combat_logs")){
-    const now = new Date().toLocaleTimeString();
-    localStorage.setItem("combat_logs", JSON.stringify([{time:now,text:"拠点1で戦闘行動"}]));
-  }
-  if(!localStorage.getItem("explore_logs")){
-    const now = new Date().toLocaleTimeString();
-    localStorage.setItem("explore_logs", JSON.stringify([{time:now,text:"拠点2で探索成功"}]));
-  }
-  if(!localStorage.getItem("rescue_logs")){
-    const now = new Date().toLocaleTimeString();
-    localStorage.setItem("rescue_logs", JSON.stringify([{time:now,text:"拠点3で救助完了"}]));
-  }
-  if(!localStorage.getItem("craft_logs")){
-    const now = new Date().toLocaleTimeString();
-    localStorage.setItem("craft_logs", JSON.stringify([{time:now,text:"新装備作成成功"}]));
-  }
-}
+// 仮の探索結果生成
+document.getElementById("exploreBtn").addEventListener("click", ()=>{
+  const items = ["魔導石", "霊薬の材料", "トンチキ素材", "救世者の贈り物"];
+  const found = items[Math.floor(Math.random()*items.length)];
+  addResult("explore", `拠点${Math.ceil(Math.random()*19)}で${found}を発見`);
+  renderLogs();
+});
 
-addSampleLogs();
+// 初回表示
 renderLogs();
 </script>
-
 </body>
 </html>
