@@ -1,0 +1,55 @@
+{
+  "item_template": {
+    "id": "item_0001",
+    "name": "アイテム名",
+    "category": "material",
+    "rarity": 1,
+    "description": "説明文が入ります。",
+    "value": 10
+  },
+
+  "generation_rules": {
+    "count": 1000,
+    "id_format": "item_XXXX",
+    "name_format": "仮アイテム_XXXX",
+    "description_format": "これは仮アイテム XXXX です。",
+    "categories": [
+      "material",
+      "craft",
+      "food",
+      "medicine",
+      "magic",
+      "mystic",
+      "nonsense",
+      "savior_gift",
+      "forbidden",
+      "phantom",
+      "anomaly",
+      "mythic",
+      "weapon",
+      "armor",
+      "accessory",
+      "base",
+      "fuel",
+      "rare",
+      "event",
+      "key"
+    ],
+    "rarity_distribution": {
+      "1": 500,
+      "2": 300,
+      "3": 150,
+      "4": 40,
+      "5": 10
+    },
+    "value_range": {
+      "1": [10, 50],
+      "2": [50, 200],
+      "3": [200, 800],
+      "4": [800, 3000],
+      "5": [3000, 15000]
+    }
+  },
+
+  "items": []
+}
