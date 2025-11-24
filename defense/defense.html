@@ -178,6 +178,31 @@ for(let i=0;i<numBases;i++){
   });
 }
 
+      // ここでモーダル内ボタンに動作を追加
+    document.getElementById("combatBtn").onclick = () => {
+        if(selectedBase){
+            addAction(`${selectedBase.dataset.id}で戦闘行動`);
+            // 戦闘結果ログ画面に飛ぶ
+            window.location.href = "log/result.html#combat";
+            closeModal();
+        }
+    };
+    document.getElementById("exploreBtn").onclick = () => {
+        if(selectedBase){
+            addAction(`${selectedBase.dataset.id}で探索行動`);
+            window.location.href = "log/result.html#explore";
+            closeModal();
+        }
+    };
+    document.getElementById("rescueBtn").onclick = () => {
+        if(selectedBase){
+            addAction(`${selectedBase.dataset.id}で救助行動`);
+            window.location.href = "log/result.html#rescue";
+            closeModal();
+        }
+    };
+});
+
 // モーダル閉じる
 function closeModal(){ modalBg.style.display="none"; }
 modalBg.addEventListener("click",(e)=>{ if(e.target===modalBg) closeModal(); });
