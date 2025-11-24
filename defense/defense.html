@@ -1,272 +1,62 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>星守戦線戦況 - 拠点モニタリング</title>
-<style>
-body {
-  margin:0;
-  font-family:"Consolas","Roboto Mono",monospace;
-  background:#000;
-  color:#e0e0e0;
-  display:flex;
-  flex-direction:column;
-}
-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 20px;
-  background:#111;
-  border-bottom:1px solid #444;
-}
-header h1 { font-size:1.2em; color:#8ae1ff; }
-nav a { color:#8ae1ff; margin-left:12px; text-decoration:none; transition:0.3s; }
-nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
-
-#announcement {
-  width:100%;
-  text-align:center;
-  font-size:1em;
-  white-space:nowrap;
-  overflow:hidden;
-  height:2em;
-  margin-top:5px;
-  color:#7fe8ff;
-}
-.scroll-text { display:inline-block; }
-
-#main-container { display:flex; flex:1; }
-#map {
-  position:relative;
-  flex:1;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-#status-panel {
-  width:280px;
-  background:#111;
-  border-left:1px solid #555;
-  padding:10px;
-  overflow-y:auto;
-  max-height:100%;
-}
-.status-entry { border-bottom:1px solid #333; padding:6px 0; font-size:0.85em; }
-
-.base {
-  position:absolute;
-  width:55px; height:55px;
-  border-radius:50%;
-  background:rgba(90,200,255,0.2);
-  border:2px solid #8ae1ff;
-  display:flex; justify-content:center; align-items:center;
-  font-size:0.8em;
-  color:#8ae1ff;
-  cursor:pointer;
-  transition:all 0.5s ease;
-}
-.hp-bar {
-  width:40px; height:4px;
-  background:#222;
-  border:1px solid #444;
-  position:absolute;
-  bottom:-8px;
-  left:7px;
-  border-radius:2px;
-}
-.hp-fill { height:100%; border-radius:2px; background:#00ff9d; }
-
-.modal-bg {
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.6);
-  justify-content:center;
-  align-items:center;
-  z-index:100;
-}
-.modal-content {
-  background:#222;
-  padding:20px;
-  border:2px solid #8ae1ff;
-  border-radius:8px;
-  text-align:center;
-  max-height:80%;
-  overflow-y:auto;
-}
-.modal-content button {
-  margin:5px;
-  padding:8px 12px;
-  background:#111;
-  border:1px solid #8ae1ff;
-  color:#8ae1ff;
-  cursor:pointer;
-}
-.modal-content button:hover {
-  background:#8ae1ff; color:#000;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>防衛戦況モニタ</title>
+  <style>
+    body { margin:0; font-family:"Consolas","Roboto Mono",monospace; background:#000; color:#e0e0e0; display:flex; flex-direction:column; }
+    #main-container { display:flex; flex:1; }
+    #map { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
+    #status-panel { width:280px; background:#111; border-left:1px solid #555; padding:10px; overflow-y:auto; max-height:100%; }
+    .base { position:absolute; width:55px; height:55px; border-radius:50%; background:rgba(90,200,255,0.2); border:2px solid #8ae1ff; display:flex; justify-content:center; align-items:center; font-size:0.8em; color:#8ae1ff; cursor:pointer; transition:all 0.5s ease; }
+    .hp-bar { width:40px; height:4px; background:#222; border:1px solid #444; position:absolute; bottom:-8px; left:7px; border-radius:2px; }
+    .hp-fill { height:100%; border-radius:2px; background:#00ff9d; }
+  </style>
 </head>
 <body>
-<header>
-  <h1>防衛戦況モニタ</h1>
   <div id="header-container"></div>
-</header>
+  <script src="../common/header-loader.js"></script>
 
-<div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
-
-<div id="main-container">
-  <div id="map"></div>
-  <div id="status-panel"></div>
-</div>
-
-<div class="modal-bg" id="modalBg">
-  <div class="modal-content" id="modalContent">
-    <h3 id="modalTitle"></h3>
-    <div id="modalBody"></div>
-    <div>
-      <button id="combatBtn">⚔ 戦闘</button>
-      <button id="exploreBtn">🧭 探索</button>
-      <button id="rescueBtn">🩹 救助</button>
-    </div>
-    <button onclick="closeModal()">閉じる</button>
+  <div id="main-container">
+    <div id="map"></div>
+    <div id="status-panel"></div>
   </div>
-</div>
 
-<script>
-const map = document.getElementById("map");
-const statusPanel = document.getElementById("status-panel");
-const announcementText = document.getElementById("announcementText");
-const modalBg = document.getElementById("modalBg");
-const modalTitle = document.getElementById("modalTitle");
-const modalBody = document.getElementById("modalBody");
+  <script>
+    const map=document.getElementById("map");
+    const statusPanel=document.getElementById("status-panel");
+    const bases=[];
+    const numBases=20;
+    const radius=250;
+    for(let i=0;i<numBases;i++){
+      const base=document.createElement("div");
+      base.classList.add("base");
+      base.dataset.id=i===0?"本部":`拠点${i}`;
+      base.dataset.hp=100;
+      base.dataset.enemies=Math.floor(Math.random()*300);
+      map.appendChild(base);
+      bases.push(base);
+    }
+    function positionBases(){
+      const centerX=map.offsetWidth/2, centerY=map.offsetHeight/2+250;
+      bases.forEach((b,i)=>{
+        if(i===0){ b.style.left=centerX-27.5+"px"; b.style.top=centerY-27.5+"px"; return; }
+        const angle=(i/19)*2*Math.PI, dx=Math.sin(angle*3)*20, dy=Math.cos(angle*5)*20;
+        b.style.left=centerX+radius*Math.cos(angle)+dx-27.5+"px";
+        b.style.top=centerY+radius*Math.sin(angle)+dy-27.5+"px";
+      });
+    }
+    positionBases(); window.addEventListener("resize",positionBases);
 
-let currentChar = JSON.parse(localStorage.getItem("currentChar")) || { name:"未設定", recentActions:[] };
-
-const bases = [];
-const numBases = 20;
-const radius = 250;
-
-for(let i=0;i<numBases;i++){
-  const base=document.createElement("div");
-  base.classList.add("base");
-  base.dataset.id=i===0?"本部":`拠点${i}`;
-  base.dataset.hp=100;
-  base.dataset.resource=(Math.random()*4000+1000).toFixed(0);
-  base.dataset.enemies=Math.floor(Math.random()*300);
-  base.textContent=base.dataset.id;
-
-  const hpBar=document.createElement("div");
-  hpBar.classList.add("hp-bar");
-  const hpFill=document.createElement("div");
-  hpFill.classList.add("hp-fill");
-  hpBar.appendChild(hpFill);
-  base.appendChild(hpBar);
-  map.appendChild(base);
-  bases.push(base);
-
-  base.addEventListener("click", ()=>{
-    modalBg.style.display="flex";
-    modalTitle.textContent = base.dataset.id;
-    modalBody.innerHTML = `<p>選択した拠点: ${base.dataset.id}</p>`;
-    selectedBase = base;
-  });
-}
-
-function closeModal(){ modalBg.style.display="none"; }
-modalBg.addEventListener("click",(e)=>{ if(e.target===modalBg) closeModal(); });
-
-function positionBases(){
-  const centerX=map.offsetWidth/2;
-  const centerY=map.offsetHeight/2 + 250;
-  bases.forEach((base,i)=>{
-    if(i===0){ base.style.left=`${centerX-27.5}px`; base.style.top=`${centerY-27.5}px`; return; }
-    const angle=(i/19)*2*Math.PI;
-    const distortX=Math.sin(angle*3)*20;
-    const distortY=Math.cos(angle*5)*20;
-    base.style.left=`${centerX + radius*Math.cos(angle)+distortX-27.5}px`;
-    base.style.top=`${centerY + radius*Math.sin(angle)+distortY-27.5}px`;
-  });
-}
-positionBases();
-window.addEventListener("resize",positionBases);
-
-function updateBases(){
-  bases.forEach(base=>{
-    if(base.dataset.id==="本部") return;
-    const hp=Math.max(0, base.dataset.hp - Math.random()*5);
-    base.dataset.hp=hp.toFixed(0);
-    base.dataset.enemies=Math.max(0, base.dataset.enemies - Math.random()*5).toFixed(0);
-    base.dataset.resource=(parseInt(base.dataset.resource)+Math.random()*30-15).toFixed(0);
-    const hpFill=base.querySelector(".hp-fill");
-    hpFill.style.width=`${hp}%`;
-    hpFill.style.background = hp>60?"#00ff9d": hp>30?"#ffeb3b":"#ff4b4b";
-  });
-  updateStatusPanel();
-}
-
-function updateStatusPanel(){
-  statusPanel.innerHTML="<h3>拠点ステータス</h3>";
-  bases.forEach(base=>{
-    const entry=document.createElement("div");
-    entry.classList.add("status-entry");
-    entry.innerHTML=`<strong>${base.dataset.id}</strong><br>
-      💚HP: ${base.dataset.hp}%　🪨資源: ${base.dataset.resource}　👾敵数: ${base.dataset.enemies}`;
-    statusPanel.appendChild(entry);
-  });
-}
-
-let annIndex=0,scrolling=false;
-function scrollAnnouncement(){
-  if(scrolling) return;
-  scrolling=true;
-  const aliveBases=bases.filter(b=>b.dataset.id!=="本部");
-  if(aliveBases.length===0){
-    announcementText.style.color="#00ff7f";
-    announcementText.textContent="全拠点、防衛完了！";
-    scrolling=false;
-    return;
-  }
-  const b=aliveBases[annIndex%aliveBases.length];
-  announcementText.style.color = b.dataset.hp>50?"#7fe8ff":"#ff4b4b";
-  announcementText.textContent = `${b.dataset.id} 防衛中、状況更新`;
-
-  announcementText.style.transition="none";
-  announcementText.style.transform="translateX(100%)";
-  requestAnimationFrame(()=>{
-    announcementText.style.transition="transform 8s linear";
-    announcementText.style.transform="translateX(-100%)";
-    setTimeout(()=>{
-      announcementText.style.transition="none";
-      announcementText.style.transform="translateX(0%)";
-      setTimeout(()=>{
-        annIndex++;
-        scrolling=false;
-        scrollAnnouncement();
-      },3000);
-    },8000);
-  });
-}
-
-function addAction(action){
-  const timestamp = new Date().toLocaleTimeString();
-  currentChar.recentActions.unshift(`[${timestamp}] ${action}`);
-  if(currentChar.recentActions.length>20) currentChar.recentActions.pop();
-  localStorage.setItem("currentChar", JSON.stringify(currentChar));
-}
-
-let selectedBase = null;
-document.getElementById("combatBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で戦闘行動`); closeModal(); } };
-document.getElementById("exploreBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で探索行動`); closeModal(); } };
-document.getElementById("rescueBtn").onclick = ()=>{ if(selectedBase){ addAction(`${selectedBase.dataset.id}で救助行動`); closeModal(); } };
-
-updateStatusPanel();
-updateBases();
-scrollAnnouncement();
-setInterval(updateBases,5000);
-</script>
-<script src="./common/header.js"></script>
+    function updateStatusPanel(){
+      statusPanel.innerHTML="<h3>拠点ステータス</h3>";
+      bases.forEach(b=>{
+        const entry=document.createElement("div");
+        entry.innerHTML=`<strong>${b.dataset.id}</strong> 💚HP:${b.dataset.hp}% 👾敵:${b.dataset.enemies}`;
+        statusPanel.appendChild(entry);
+      });
+    }
+    updateStatusPanel();
+  </script>
 </body>
 </html>
