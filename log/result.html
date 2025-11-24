@@ -1,1 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>結果ログ</title>
+<style>
+  body {
+    margin: 0;
+    background: #000;
+    color: #e0e0e0;
+    font-family: Consolas, "Roboto Mono", monospace;
+  }
+
+  header {
+    background: #111;
+    padding: 10px 20px;
+    font-size: 20px;
+    border-bottom: 1px solid #333;
+  }
+
+  /* タブボタン */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid #333;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 12px 0;
+    background: #111;
+    border: none;
+    color: #ccc;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .tab-btn:hover {
+    background: #222;
+  }
+  .tab-btn.active {
+    background: #333;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  /* タブの中身 */
+  .tab-content {
+    display: none;
+    padding: 20px;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  /* ログの箱 */
+  .log-item {
+    background: #111;
+    border: 1px solid #333;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header>📝 結果ログ</header>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="combat">⚔ 戦闘</button>
+  <button class="tab-btn" data-tab="explore">🧭 探索</button>
+  <button class="tab-btn" data-tab="rescue">🚑 救助</button>
+  <button class="tab-btn" data-tab="craft">🛠 クラフト</button>
+</div>
+
+<!-- タブ中身 -->
+<div id="combat" class="tab-content active"></div>
+<div id="explore" class="tab-content"></div>
+<div id="rescue" class="tab-content"></div>
+<div id="craft" class="tab-content"></div>
+
+<script>
+/* ------------------------------
+   ▼ タブ切り替え
+------------------------------ */
+const tabButtons = document.querySelectorAll(".tab-btn");
+const tabContents = document.querySelectorAll(".tab-content");
+
+tabButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.tab;
+
+    // ボタンのアクティブ切り替え
+    tabButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    // 中身の切り替え
+    tabContents.forEach(c => c.classList.remove("active"));
+    document.getElementById(tab).classList.add("active");
+  });
+});
+
+/* ------------------------------
+   ▼ localStorage からログ取得
+   配列で保存されたログを読み込み
+------------------------------ */
+
+function loadLogs(key, containerId) {
+  const logs = JSON.parse(localStorage.getItem(key) || "[]");
+  const container = document.getElementById(containerId);
+
+  if (logs.length === 0) {
+    container.innerHTML = "<p>まだログがありません。</p>";
+    return;
+  }
+
+  container.innerHTML = logs
+    .map(log => `<div class="log-item">${log}</div>`)
+    .join("");
+}
+
+loadLogs("combatLogs", "combat");
+loadLogs("exploreLogs", "explore");
+loadLogs("rescueLogs", "rescue");
+loadLogs("craftLogs", "craft");
+</script>
+
+</body>
+</html>
 
