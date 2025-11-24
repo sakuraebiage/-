@@ -16,7 +16,6 @@
     <h1>星守戦線</h1>
     <nav class="main-nav">
       <div class="tab-group">
-        <a href="${prefix}index.html">🏠 ホーム</a>
         <a href="${prefix}defense/defense.html">🛡 防衛</a>
         <a href="${prefix}setting/setting.html">⚔ 戦闘設定</a>
         <a href="${prefix}traning/traning.html">💪 訓練</a>
