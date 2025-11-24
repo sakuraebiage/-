@@ -135,10 +135,12 @@ body {
 // 要素取得
 const map = document.getElementById("map");
 const statusPanel = document.getElementById("status-panel");
-const announcementText = document.getElementById("announcementText");
 const modalBg = document.getElementById("modalBg");
 const modalTitle = document.getElementById("modalTitle");
 const modalBody = document.getElementById("modalBody");
+const combatBtn = document.getElementById("combatBtn");
+const exploreBtn = document.getElementById("exploreBtn");
+const rescueBtn = document.getElementById("rescueBtn");
 
 let currentChar = JSON.parse(localStorage.getItem("currentChar")) || { name:"未設定", recentActions:[] };
 
@@ -178,23 +180,6 @@ for(let i=0;i<numBases;i++){
     modalBg.style.display="flex";
     modalTitle.textContent = base.dataset.id;
     modalBody.innerHTML = `<p>選択した拠点: ${base.dataset.id}</p>`;
-
-    // モーダルボタンに動作を設定
-    document.getElementById("combatBtn").onclick = () => {
-      addAction(`${selectedBase.dataset.id}で戦闘行動`, "combat");
-      window.location.href = "log/result.html#combat";
-      closeModal();
-    };
-    document.getElementById("exploreBtn").onclick = () => {
-      addAction(`${selectedBase.dataset.id}で探索行動`, "explore");
-      window.location.href = "log/result.html#explore";
-      closeModal();
-    };
-    document.getElementById("rescueBtn").onclick = () => {
-      addAction(`${selectedBase.dataset.id}で救助行動`, "rescue");
-      window.location.href = "log/result.html#rescue";
-      closeModal();
-    };
   });
 }
 
@@ -268,6 +253,27 @@ function addAction(action, type){
   }
 }
 
+// -------------------
+// ★ モーダルボタンを独立させる ★
+function handleAction(type){
+  if(!selectedBase) return;
+  let actionText = "";
+  switch(type){
+    case "combat": actionText = `${selectedBase.dataset.id}で戦闘行動`; break;
+    case "explore": actionText = `${selectedBase.dataset.id}で探索行動`; break;
+    case "rescue": actionText = `${selectedBase.dataset.id}で救助行動`; break;
+  }
+  addAction(actionText, type);
+  closeModal();
+  window.location.href = `/hosimori/log/results.html#${type}`;
+}
+
+// ボタンにイベントを紐付け
+combatBtn.onclick = () => handleAction("combat");
+exploreBtn.onclick = () => handleAction("explore");
+rescueBtn.onclick = () => handleAction("rescue");
+
+// 初期更新
 updateStatusPanel();
 updateBases();
 setInterval(updateBases,5000);
