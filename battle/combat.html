@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>戦闘結果 - 防衛戦況</title>
+<style>
+body { background:#000; color:#e0e0e0; font-family:"Consolas","Roboto Mono",monospace; padding:20px; }
+h1 { color:#ff4b4b; }
+button { margin-top:20px; padding:8px 12px; background:#111; color:#ff4b4b; border:1px solid #ff4b4b; cursor:pointer; }
+button:hover { background:#ff4b4b; color:#000; }
+</style>
+</head>
+<body>
+<h1>戦闘結果</h1>
+<div id="result"></div>
+<button onclick="goBack()">戻る</button>
+
+<script>
+// URLパラメータから拠点名取得
+const params = new URLSearchParams(window.location.search);
+const baseId = params.get("base");
+
+const resultDiv = document.getElementById("result");
+
+// ダミー戦闘結果生成
+const enemies = Math.floor(Math.random()*50)+10;
+const losses = Math.floor(Math.random()*10);
+resultDiv.innerHTML = `
+<p>拠点 <strong>${baseId}</strong> で戦闘を実施</p>
+<p>敵を <strong>${enemies}</strong> 体撃破！</p>
+<p>味方の損失 <strong>${losses}</strong> 人</p>
+`;
+
+function goBack(){
+    window.history.back();
+}
+</script>
+</body>
+</html>
