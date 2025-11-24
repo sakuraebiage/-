@@ -4,126 +4,65 @@
 <meta charset="UTF-8">
 <title>結果ログ</title>
 <style>
-  body {
-    margin: 0;
-    background: #000;
-    color: #e0e0e0;
-    font-family: Consolas, "Roboto Mono", monospace;
-  }
-
-  header {
-    background: #111;
-    padding: 10px 20px;
-    font-size: 20px;
-    border-bottom: 1px solid #333;
-  }
-
-  /* タブボタン */
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid #333;
-  }
-
-  .tab-btn {
-    flex: 1;
-    padding: 12px 0;
-    background: #111;
-    border: none;
-    color: #ccc;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  .tab-btn:hover {
-    background: #222;
-  }
-  .tab-btn.active {
-    background: #333;
-    color: #fff;
-    font-weight: bold;
-  }
-
-  /* タブの中身 */
-  .tab-content {
-    display: none;
-    padding: 20px;
-  }
-  .tab-content.active {
-    display: block;
-  }
-
-  /* ログの箱 */
-  .log-item {
-    background: #111;
-    border: 1px solid #333;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-  }
+body { margin:0; font-family:"Consolas","Roboto Mono",monospace; background:#000; color:#e0e0e0; }
+.tab { display:inline-block; padding:6px 12px; margin-right:4px; cursor:pointer; background:#111; border:1px solid #8ae1ff; border-radius:6px; }
+.tab.active { background:#8ae1ff; color:#000; }
+#log-container { padding:10px; max-height:80vh; overflow-y:auto; border-top:1px solid #444; }
 </style>
 </head>
 <body>
+<div id="header-container"></div>
+<script src="common/header-loader.js"></script>
 
-<header>📝 結果ログ</header>
-
-<div class="tabs">
-  <button class="tab-btn active" data-tab="combat">⚔ 戦闘</button>
-  <button class="tab-btn" data-tab="explore">🧭 探索</button>
-  <button class="tab-btn" data-tab="rescue">🚑 救助</button>
-  <button class="tab-btn" data-tab="craft">🛠 クラフト</button>
+<h2>📝 結果ログ</h2>
+<div id="tabs">
+  <div class="tab active" data-type="combat">⚔ 戦闘</div>
+  <div class="tab" data-type="explore">🧭 探索</div>
+  <div class="tab" data-type="rescue">🩹 救助</div>
+  <div class="tab" data-type="craft">⚒ クラフト</div>
 </div>
 
-<!-- タブ中身 -->
-<div id="combat" class="tab-content active"></div>
-<div id="explore" class="tab-content"></div>
-<div id="rescue" class="tab-content"></div>
-<div id="craft" class="tab-content"></div>
+<div id="log-container"></div>
+<button onclick="clearLogs()">全ログ消去</button>
 
+<script src="common/log.js"></script>
 <script>
-/* ------------------------------
-   ▼ タブ切り替え
------------------------------- */
-const tabButtons = document.querySelectorAll(".tab-btn");
-const tabContents = document.querySelectorAll(".tab-content");
+const tabs = document.querySelectorAll(".tab");
+const logContainer = document.getElementById("log-container");
+let currentType = "combat";
 
-tabButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const tab = btn.dataset.tab;
+function renderLogs(type) {
+  const logs = JSON.parse(localStorage.getItem("logs") || "{}");
+  logContainer.innerHTML = "";
+  if (!logs[type] || logs[type].length === 0) {
+    logContainer.innerHTML = "<p>まだログがありません</p>";
+    return;
+  }
+  logs[type].forEach(l => {
+    const div = document.createElement("div");
+    div.textContent = l;
+    logContainer.appendChild(div);
+  });
+}
 
-    // ボタンのアクティブ切り替え
-    tabButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    // 中身の切り替え
-    tabContents.forEach(c => c.classList.remove("active"));
-    document.getElementById(tab).classList.add("active");
+tabs.forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    tabs.forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    currentType = tab.dataset.type;
+    renderLogs(currentType);
   });
 });
 
-/* ------------------------------
-   ▼ localStorage からログ取得
-   配列で保存されたログを読み込み
------------------------------- */
-
-function loadLogs(key, containerId) {
-  const logs = JSON.parse(localStorage.getItem(key) || "[]");
-  const container = document.getElementById(containerId);
-
-  if (logs.length === 0) {
-    container.innerHTML = "<p>まだログがありません。</p>";
-    return;
+function clearLogs() {
+  if (confirm("全てのログを削除しますか？")) {
+    localStorage.removeItem("logs");
+    renderLogs(currentType);
   }
-
-  container.innerHTML = logs
-    .map(log => `<div class="log-item">${log}</div>`)
-    .join("");
 }
 
-loadLogs("combatLogs", "combat");
-loadLogs("exploreLogs", "explore");
-loadLogs("rescueLogs", "rescue");
-loadLogs("craftLogs", "craft");
+// 初回表示
+renderLogs(currentType);
 </script>
-
 </body>
 </html>
-
