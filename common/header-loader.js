@@ -3,7 +3,7 @@
   if (!headerContainer) return;
 
   // GitHub Pages のルートが "/-/" なので絶対パスで指定
-  const headerPath = "/hosimori//common/header.html";
+  const headerPath = "/hosimori/common/header.html";
 
   fetch(headerPath)
     .then(res => {
