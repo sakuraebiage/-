@@ -14,6 +14,7 @@
   else if (path.includes('/items/')) headerPath = '../common/header.html';
   else if (path.includes('/chat/')) headerPath = '../common/header.html';
   else if (path.includes('/mypage/')) headerPath = '../common/header.html';
+  else if (path.includes('/result/')) headerPath = '../common/header.html';
 
   fetch(headerPath)
     .then(res => {
