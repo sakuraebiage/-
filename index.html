@@ -48,10 +48,18 @@
 </head>
 
 <body>
-  <!-- ✅ 共通ヘッダーを読み込む -->
- <div id="header-container"></div>
- <script src="/common/header.js"></script>
+<!-- ✅ 共通ヘッダーを読み込む -->
+<div id="header-container"></div>
+<script src="common/header.js"></script>
 
+<script>
+  fetch("common/header.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("header-container").innerHTML = html;
+    });
+</script>
+  
   <main>
     <h2>登録キャラクター一覧</h2>
     <div id="character-list"></div>
