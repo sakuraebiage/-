@@ -1,12 +1,5 @@
 const headerContainer = document.getElementById("header-container");
 
-// 今のファイルがどの階層か判定
-// 例: /defense/defense.html → "../"
-//     /log/result.html → "../"
-//     /index.html → ""
-const depth = location.pathname.split("/").length - 2;
-const base = "../".repeat(depth);
-
 headerContainer.innerHTML = `
 <header class="main-header">
   <h1>星守戦線</h1>
