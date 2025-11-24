@@ -38,7 +38,7 @@
       bases.push(base);
     }
     function positionBases(){
-      const centerX=map.offsetWidth/2, centerY=map.offsetHeight/2+240;
+      const centerX=map.offsetWidth/2, centerY=map.offsetHeight/2+270;
       bases.forEach((b,i)=>{
         if(i===0){ b.style.left=centerX-27.5+"px"; b.style.top=centerY-27.5+"px"; return; }
         const angle=(i/19)*2*Math.PI, dx=Math.sin(angle*3)*20, dy=Math.cos(angle*5)*20;
