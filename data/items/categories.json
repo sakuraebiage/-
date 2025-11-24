@@ -1,1 +1,22 @@
+[
+  { "id": "material", "name": "素材" },
+  { "id": "craft", "name": "クラフト素材" },
+  { "id": "food", "name": "食料" },
+  { "id": "medicine", "name": "医療" },
+
+  { "id": "magic", "name": "魔導" },
+  { "id": "mystic", "name": "霊薬素材" },
+  { "id": "nonsense", "name": "トンチキ素材" },
+
+  { "id": "weapon", "name": "武器" },
+  { "id": "armor", "name": "防具" },
+  { "id": "accessory", "name": "アクセサリ" },
+
+  { "id": "base", "name": "基地資源" },
+  { "id": "fuel", "name": "燃料" },
+
+  { "id": "rare", "name": "レア" },
+  { "id": "event", "name": "イベント" },
+  { "id": "key", "name": "キーアイテム" }
+]
 
