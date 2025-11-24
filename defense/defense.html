@@ -12,18 +12,6 @@ body {
   display:flex;
   flex-direction:column;
 }
-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 20px;
-  background:#111;
-  border-bottom:1px solid #444;
-}
-header h1 { font-size:1.2em; color:#8ae1ff; }
-nav a { color:#8ae1ff; margin-left:12px; text-decoration:none; transition:0.3s; }
-nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
-
 #announcement {
   width:100%;
   text-align:center;
@@ -63,7 +51,7 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
   border:2px solid #8ae1ff;
   display:flex; justify-content:center; align-items:center;
   font-size:0.8em;
-  color:#fff; /* 文字を目立たせる */
+  color:#fff;
   cursor:pointer;
   transition:all 0.5s ease;
 }
@@ -111,30 +99,32 @@ nav a:hover { color:#fff; text-shadow:0 0 5px #00eaff; }
 </style>
 </head>
 <body>
-<header>
-  <h1>防衛戦況モニタ</h1>
+  <!-- 共通ヘッダー -->
   <div id="header-container"></div>
-</header>
+  <script src="../common/header-loader.js"></script>
 
-<div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
+  <!-- お知らせ -->
+  <div id="announcement"><span id="announcementText" class="scroll-text"></span></div>
 
-<div id="main-container">
-  <div id="map"></div>
-  <div id="status-panel"></div>
-</div>
-
-<div class="modal-bg" id="modalBg">
-  <div class="modal-content" id="modalContent">
-    <h3 id="modalTitle"></h3>
-    <div id="modalBody"></div>
-    <div>
-      <button id="combatBtn">⚔ 戦闘</button>
-      <button id="exploreBtn">🧭 探索</button>
-      <button id="rescueBtn">🩹 救助</button>
-    </div>
-    <button onclick="closeModal()">閉じる</button>
+  <!-- メイン画面 -->
+  <div id="main-container">
+    <div id="map"></div>
+    <div id="status-panel"></div>
   </div>
-</div>
+
+  <!-- モーダル -->
+  <div class="modal-bg" id="modalBg">
+    <div class="modal-content" id="modalContent">
+      <h3 id="modalTitle"></h3>
+      <div id="modalBody"></div>
+      <div>
+        <button id="combatBtn">⚔ 戦闘</button>
+        <button id="exploreBtn">🧭 探索</button>
+        <button id="rescueBtn">🩹 救助</button>
+      </div>
+      <button onclick="closeModal()">閉じる</button>
+    </div>
+  </div>
 
 <script>
 // 要素取得
@@ -188,13 +178,13 @@ function positionBases(){
   const centerX = map.offsetWidth/2;
   const centerY = map.offsetHeight/2;
   bases.forEach((base,i)=>{
-    if(i===0){ // 本部は真ん中
+    if(i===0){
       base.style.left = `${centerX-27.5}px`;
       base.style.top = `${centerY-27.5}px`;
       return;
     }
     const angle = ((i-1)/(numBases-1))*2*Math.PI;
-    const distortX = Math.sin(angle*3)*10; // 乱数補正を小さく
+    const distortX = Math.sin(angle*3)*10;
     const distortY = Math.cos(angle*5)*10;
     base.style.left = `${centerX + radius*Math.cos(angle)+distortX-27.5}px`;
     base.style.top = `${centerY + radius*Math.sin(angle)+distortY-27.5}px`;
@@ -246,6 +236,5 @@ updateStatusPanel();
 updateBases();
 setInterval(updateBases,5000);
 </script>
-<script src="../common/header.js"></script>
 </body>
 </html>
