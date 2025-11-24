@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>探索結果</title>
+<style>
+body {
+  margin:0;
+  font-family:"Consolas","Roboto Mono",monospace;
+  background:#000;
+  color:#e0e0e0;
+}
+header {
+  padding:10px 20px;
+  background:#111;
+  border-bottom:1px solid #444;
+}
+h1 { color:#8ae1ff; }
+#results {
+  padding:20px;
+}
+.item-entry {
+  opacity:0;
+  transform:translateY(20px);
+  border-bottom:1px solid #333;
+  padding:5px 0;
+  transition:all 0.5s ease;
+}
+.item-entry.rare {
+  color:#ffeb3b;
+  font-weight:bold;
+  text-shadow:0 0 8px #ffeb3b;
+}
+.action-entry {
+  opacity:0;
+  transform:translateX(-20px);
+  transition:all 0.4s ease;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>探索結果</h1>
+</header>
+
+<div id="results">
+  <button id="generateBtn">探索ログ生成</button>
+  <div id="logContainer"></div>
+</div>
+
+<script src="./generate_explore_log.js"></script>
+<script>
+const logContainer = document.getElementById("logContainer");
+const generateBtn = document.getElementById("generateBtn");
+
+function animateItems(items){
+  items.forEach((el,i)=>{
+    setTimeout(()=>{
+      el.style.opacity="1";
+      el.style.transform="translateY(0)";
+    }, i*300);
+  });
+}
+
+function animateActions(actions){
+  actions.forEach((el,i)=>{
+    setTimeout(()=>{
+      el.style.opacity="1";
+      el.style.transform="translateX(0)";
+    }, i*200);
+  });
+}
+
+generateBtn.onclick = async () => {
+  const response = await fetch("./explore_log.json").catch(()=>null);
+  if(!response){
+    logContainer.innerHTML = "<p>まず「探索ログ生成」を押してください</p>";
+    return;
+  }
+  const log = await response.json();
+  let html = `<h3>拠点 ${log.baseId} 探索結果</h3>`;
+  
+  html += "<p>行動:</p><ul>";
+  log.actions.forEach(a=>html+=`<li class="action-entry">${a}</li>`);
+  html += "</ul>";
+  
+  html += "<p>取得物:</p><ul>";
+  log.itemsAcquired.forEach(i=>{
+    html += `<li class="item-entry ${i.isRareBonus?'rare':''}">${i.name} (レア度:${i.rarity})</li>`;
+  });
+  html += "</ul>";
+  
+  logContainer.innerHTML = html;
+  
+  animateActions(document.querySelectorAll(".action-entry"));
+  animateItems(document.querySelectorAll(".item-entry"));
+};
+</script>
+</body>
+</html>
