@@ -8,6 +8,12 @@
   { "id": "mystic", "name": "霊薬素材" },
   { "id": "nonsense", "name": "トンチキ素材" },
 
+  { "id": "savior_gift", "name": "救世者の贈物" },
+  { "id": "forbidden", "name": "禁忌素材" },
+  { "id": "phantom", "name": "幻獣素材" },
+  { "id": "anomaly", "name": "異常現象素材" },
+  { "id": "mythic", "name": "神話級素材" },
+
   { "id": "weapon", "name": "武器" },
   { "id": "armor", "name": "防具" },
   { "id": "accessory", "name": "アクセサリ" },
@@ -19,4 +25,3 @@
   { "id": "event", "name": "イベント" },
   { "id": "key", "name": "キーアイテム" }
 ]
-
