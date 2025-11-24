@@ -1,28 +1,40 @@
-// header.js
-// 各ページに共通ヘッダーを挿入する場合
-document.addEventListener("DOMContentLoaded", () => {
-  const headerContainer = document.getElementById("header-container");
-  if (!headerContainer) return;
+// common/header.js
 
-  headerContainer.innerHTML = `
-    <header class="main-header">
-      <h1>星守戦線</h1>
-      <nav class="main-nav">
-        <div class="tab-group">
-          <a href="/index.html">🏠 ホーム</a>
-          <a href="/defense/defense.html">🛡 防衛</a>
-          <a href="/setting/setting.html">⚔ 戦闘設定</a>
-          <a href="/traning/traning.html">💪 訓練</a>
-          <a href="/craft/craft.html">⚒ 工房</a>
-          <a href="/items/items.html">🎒 アイテム</a>
-          <a href="/shop.html">🏪 購買</a>
-        </div>
-        <div class="tab-group">
-          <a href="/chat/chat.html">💬 チャット</a>
-          <a href="/mypage/mypage.html">⚙ 設定</a>
-          <a href="/logout.html">🚪 ログアウト</a>
-        </div>
-      </nav>
-    </header>
+(function() {
+  // どのページから読み込んでいるか判定
+  const path = window.location.pathname;
+  // console.log(path);
+
+  // ページごとの相対パスを決定
+  let prefix = "./"; // デフォルト（index.html と同じ階層の場合）
+  if (path.includes("/defense/") || path.includes("/items/") || path.includes("/setting/") || path.includes("/traning/") || path.includes("/craft/")) {
+    prefix = "../"; // サブフォルダにいる場合は ../
+  }
+
+  const headerHTML = `
+  <header class="main-header">
+    <h1>星守戦線</h1>
+    <nav class="main-nav">
+      <div class="tab-group">
+        <a href="${prefix}index.html">🏠 ホーム</a>
+        <a href="${prefix}defense/defense.html">🛡 防衛</a>
+        <a href="${prefix}setting/setting.html">⚔ 戦闘設定</a>
+        <a href="${prefix}traning/traning.html">💪 訓練</a>
+        <a href="${prefix}craft/craft.html">⚒ 工房</a>
+        <a href="${prefix}items/items.html">🎒 アイテム</a>
+        <a href="${prefix}shop.html">🏪 購買</a>
+      </div>
+      <div class="tab-group">
+        <a href="${prefix}chat/chat.html">💬 チャット</a>
+        <a href="${prefix}mypage/mypage.html">⚙ 設定</a>
+        <a href="${prefix}logout.html">🚪 ログアウト</a>
+      </div>
+    </nav>
+  </header>
   `;
-});
+
+  const headerContainer = document.getElementById("header-container");
+  if (headerContainer) {
+    headerContainer.innerHTML = headerHTML;
+  }
+})();
