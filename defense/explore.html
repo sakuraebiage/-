@@ -1,1 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>星守戦線探索 - 探索</title>
+<style>
+body { margin:0; font-family:"Consolas","Roboto Mono",monospace; background:#000; color:#e0e0e0; display:flex; flex-direction:column; }
+#header-container { width:100%; }
+#main-container { display:flex; flex:1; }
+#map { position:relative; flex:1; display:flex; justify-content:center; align-items:center; min-height:600px; }
+#status-panel { width:280px; background:#111; border-left:1px solid #555; padding:10px; overflow-y:auto; max-height:100%; }
+.status-entry { border-bottom:1px solid #333; padding:6px 0; font-size:0.85em; }
+.base { position:absolute; width:55px; height:55px; border-radius:50%; background:rgba(90,200,255,0.2); border:2px solid #8ae1ff; display:flex; justify-content:center; align-items:center; font-size:0.8em; color:#fff; cursor:pointer; transition:all 0.5s ease; }
+.hp-bar { width:40px; height:4px; background:#222; border:1px solid #444; position:absolute; bottom:-8px; left:7px; border-radius:2px; }
+.hp-fill { height:100%; border-radius:2px; background:#00ff9d; }
+.modal-bg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:100; }
+.modal-content { background:#222; padding:20px; border:2px solid #8ae1ff; border-radius:8px; text-align:center; max-height:80%; overflow-y:auto; }
+.modal-content button { margin:5px; padding:8px 12px; background:#111; border:1px solid #8ae1ff; color:#8ae1ff; cursor:pointer; }
+.modal-content button:hover { background:#8ae1ff; color:#000; }
+</style>
+</head>
+<body>
+
+<!-- 共通ヘッダー -->
+<div id="header-container"></div>
+<script src="../common/header-loader.js"></script>
+
+<!-- メイン画面 -->
+<div id="main-container">
+  <div id="map"></div>
+  <div id="status-panel"></div>
+</div>
+
+<!-- モーダル -->
+<div class="modal-bg" id="exploreModalBg">
+  <div class="modal-content" id="exploreModalContent">
+    <h3 id="exploreModalTitle"></h3>
+    <div id="exploreModalBody"></div>
+    <div>
+      <button id="searchBtn">🔍 調査</button>
+      <button id="gatherBtn">🪵 採取</button>
+      <button id="huntBtn">🏹 狩猟</button>
+    </div>
+    <button onclick="closeExploreModal()">閉じる</button>
+  </div>
+</div>
+
+<script src="explore.js"></script>
+</body>
+</html>
 
