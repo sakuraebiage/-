@@ -1,3 +1,11 @@
+// =======================================
+// defense.js - 拠点防衛シミュレーション
+// =======================================
+
+// ----------------- 初期化 -----------------
+let currentChar = JSON.parse(localStorage.getItem("currentChar")) || { name:"未設定", recentActions:[] };
+if(!Array.isArray(currentChar.recentActions)) currentChar.recentActions = [];
+
 const bases = [];
 const numBases = 20;
 const radius = 250;
@@ -5,7 +13,7 @@ const battlefield = document.getElementById("bases-container");
 const baseStatusPanel = document.getElementById("base-status");
 const announceText = document.getElementById("announce-text");
 
-// 一度だけ座標を固定する
+// ----------------- 拠点座標生成 -----------------
 function generateBasePositions() {
   const saved = localStorage.getItem("basePositions");
   if (saved) return JSON.parse(saved);
@@ -22,10 +30,9 @@ function generateBasePositions() {
   localStorage.setItem("basePositions", JSON.stringify(positions));
   return positions;
 }
-
 const positions = generateBasePositions();
 
-// 拠点生成
+// ----------------- 拠点生成 -----------------
 positions.forEach((pos, i) => {
   const base = {
     id: i + 1,
@@ -39,7 +46,7 @@ positions.forEach((pos, i) => {
   bases.push(base);
 });
 
-// DOM生成
+// ----------------- DOM生成 -----------------
 bases.forEach(base => {
   const el = document.createElement("div");
   el.classList.add("base");
@@ -53,6 +60,7 @@ bases.forEach(base => {
   base.el = el;
 });
 
+// ----------------- ステータス更新 -----------------
 function updateBaseStatus() {
   baseStatusPanel.innerHTML = "";
   bases.forEach(base => {
@@ -69,7 +77,7 @@ function updateBaseStatus() {
   });
 }
 
-// 戦況アナウンス
+// ----------------- 戦況アナウンス -----------------
 function nextAnnounce() {
   const activeBase = bases[Math.floor(Math.random() * bases.length)];
   let msg = "";
@@ -88,21 +96,34 @@ function nextAnnounce() {
   announceText.textContent = msg;
 }
 
-// 定期更新（HPや敵の減少などの処理）
+// ----------------- アクションログ追加 -----------------
+function addAction(action) {
+  const timestamp = new Date().toLocaleTimeString();
+  const logEntry = `[${timestamp}] ${action}`;
+  currentChar.recentActions.unshift(logEntry);
+  if(currentChar.recentActions.length>50) currentChar.recentActions.pop();
+  localStorage.setItem("currentChar", JSON.stringify(currentChar));
+}
+
+// ----------------- 戦闘シミュレーション -----------------
 function simulateBattle() {
   bases.forEach(base => {
     if (base.enemies > 0 && base.hp > 0) {
-      base.hp -= Math.random() * 5;
-      base.enemies -= Math.random() * 8;
+      const dmg = Math.random()*5;
+      const lostEnemies = Math.random()*8;
+      base.hp -= dmg;
+      base.enemies -= lostEnemies;
       if (base.hp < 0) base.hp = 0;
       if (base.enemies < 0) base.enemies = 0;
+
+      addAction(`${base.name}で戦闘発生：HP-${Math.floor(dmg)}, 敵-${Math.floor(lostEnemies)}`);
     }
   });
   updateBaseStatus();
   nextAnnounce();
 }
 
-// 初期化
+// ----------------- 初期化 -----------------
 updateBaseStatus();
 nextAnnounce();
-setInterval(simulateBattle, 5000); // 5秒ごとに更新
+setInterval(simulateBattle, 3000); // 3秒ごとに更新
