@@ -132,7 +132,8 @@ body {
 </div>
 
 <script>
-// 要素取得
+// ---------------------------
+// 基本要素取得
 const map = document.getElementById("map");
 const statusPanel = document.getElementById("status-panel");
 const modalBg = document.getElementById("modalBg");
@@ -152,9 +153,9 @@ const rescueLog = JSON.parse(localStorage.getItem("rescueLog")) || [];
 const bases = [];
 const numBases = 20;
 const radius = 250;
-
 let selectedBase = null;
 
+// ---------------------------
 // 拠点生成
 for(let i=0;i<numBases;i++){
   const base = document.createElement("div");
@@ -183,10 +184,12 @@ for(let i=0;i<numBases;i++){
   });
 }
 
+// ---------------------------
 // モーダル閉じる
 function closeModal(){ modalBg.style.display="none"; }
 modalBg.addEventListener("click",(e)=>{ if(e.target===modalBg) closeModal(); });
 
+// ---------------------------
 // 拠点配置
 function positionBases(){
   const centerX = map.offsetWidth/2;
@@ -207,6 +210,7 @@ function positionBases(){
 positionBases();
 window.addEventListener("resize", positionBases);
 
+// ---------------------------
 // ステータス更新
 function updateBases(){
   bases.forEach(base=>{
@@ -233,6 +237,7 @@ function updateStatusPanel(){
   });
 }
 
+// ---------------------------
 // アクションログ追加
 function addAction(action, type){
   const timestamp = new Date().toLocaleTimeString();
@@ -253,30 +258,79 @@ function addAction(action, type){
   }
 }
 
-// -------------------
-// ★ モーダルボタンを独立させる ★
-function handleAction(type){
-  if(!selectedBase) return;
-  let actionText = "";
-  switch(type){
-    case "combat": actionText = `${selectedBase.dataset.id}で戦闘行動`; break;
-    case "explore": actionText = `${selectedBase.dataset.id}で探索行動`; break;
-    case "rescue": actionText = `${selectedBase.dataset.id}で救助行動`; break;
-  }
-  addAction(actionText, type);
-  closeModal();
-  window.location.href = `/hosimori/log/results.html#${type}`;
+// ---------------------------
+// 探索処理
+function openResultModal(title, html){
+  modalTitle.textContent = title;
+  modalBody.innerHTML = html;
+  modalBg.style.display = "flex";
 }
 
-// ボタンにイベントを紐付け
-combatBtn.onclick = () => handleAction("combat");
-exploreBtn.onclick = () => handleAction("explore");
-rescueBtn.onclick = () => handleAction("rescue");
+function performExplore(type){
+  if(!selectedBase) return;
 
+  let actionText = `${selectedBase.dataset.id}で${type}行動`;
+  addAction(actionText, "explore");
+
+  // ランダム結果
+  const resources = Math.floor(Math.random()*100 + 50);
+  const enemies = Math.floor(Math.random()*10);
+
+  // 拠点データ更新
+  selectedBase.dataset.resource = (parseInt(selectedBase.dataset.resource) + resources).toFixed(0);
+  selectedBase.dataset.enemies = (parseInt(selectedBase.dataset.enemies) + enemies).toFixed(0);
+
+  // 結果表示
+  const html = `
+    <p>${selectedBase.dataset.id}を${type}しました！</p>
+    <p>資源を${resources}獲得</p>
+    <p>敵を${enemies}確認</p>
+  `;
+  openResultModal("探索結果", html);
+
+  updateBases();
+}
+
+// ---------------------------
+// モーダルボタンの紐付け
+function handleAction(type){
+  if(!selectedBase) return;
+
+  if(type==="explore"){
+    // 探索種類選択UI
+    const optionsHtml = `
+      <p>${selectedBase.dataset.id}でどの探索を行いますか？</p>
+      <button id="searchBtn">調査</button>
+      <button id="gatherBtn">採取</button>
+      <button id="huntBtn">狩猟</button>
+    `;
+    modalBody.innerHTML = optionsHtml;
+
+    document.getElementById("searchBtn").onclick = ()=>performExplore("調査");
+    document.getElementById("gatherBtn").onclick = ()=>performExplore("採取");
+    document.getElementById("huntBtn").onclick = ()=>performExplore("狩猟");
+  } else {
+    let actionText = "";
+    switch(type){
+      case "combat": actionText = `${selectedBase.dataset.id}で戦闘行動`; break;
+      case "rescue": actionText = `${selectedBase.dataset.id}で救助行動`; break;
+    }
+    addAction(actionText, type);
+    closeModal();
+    window.location.href = `/hosimori/log/results.html#${type}`;
+  }
+}
+
+combatBtn.onclick = ()=>handleAction("combat");
+exploreBtn.onclick = ()=>handleAction("explore");
+rescueBtn.onclick = ()=>handleAction("rescue");
+
+// ---------------------------
 // 初期更新
 updateStatusPanel();
 updateBases();
 setInterval(updateBases,5000);
+
 </script>
 </body>
 </html>
